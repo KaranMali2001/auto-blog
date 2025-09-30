@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
-import { internalMutation } from "../_generated/server";
+import { internalMutation, mutation } from "../_generated/server";
 
 export const UserSchema = defineTable({
   clerkId: v.string(),
@@ -21,6 +21,14 @@ export const createUser = internalMutation({
   handler: async (ctx, args) => {
     const { clerkId, name, imageUrl, createdAt, updatedAt } = args;
     const user = ctx.db.insert("users", { clerkId, name, imageUrl, createdAt, updatedAt });
+    return user;
+  },
+});
+export const getCurrentUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await ctx.auth.getUserIdentity();
+    console.log("Current user:", user);
     return user;
   },
 });

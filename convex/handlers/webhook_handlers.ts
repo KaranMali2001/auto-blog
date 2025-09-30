@@ -10,7 +10,10 @@ export const githubWebhook = httpAction(async (ctx, req) => {
   console.log("Inside Github Webhook");
   try {
     const body: string = await req.text();
-    const success = await ctx.runAction(internal.action_helpers.github.VerifyGithubWebhookAction, { signature: req.headers.get("x-hub-signature-256") || "", body });
+    const success = await ctx.runAction(internal.action_helpers.github.VerifyGithubWebhookAction, {
+      signature: req.headers.get("x-hub-signature-256") || "",
+      body,
+    });
     if (!success) {
       return new Response("Invalid signature", { status: 401 });
     }
@@ -64,6 +67,7 @@ export const clerkWebhook = httpAction(async (ctx, req) => {
         createdAt: Date.now().toString(),
         updatedAt: Date.now().toString(),
       });
+      return new Response("ok", { status: 200 });
     }
 
     return new Response("ok", { status: 200 });
