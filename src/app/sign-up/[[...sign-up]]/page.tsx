@@ -1,19 +1,16 @@
 "use client";
 
 import { OtpComponent } from "@/components/authComponents/otpComponent";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { useSignUp } from "@clerk/nextjs";
+import { OAuthStrategy } from "@clerk/types";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, ArrowLeft, CheckCircle, Eye, EyeOff, XCircle } from "lucide-react";
+import { CheckCircle, Eye, EyeOff, XCircle } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function SignUpComponent() {
   const { isLoaded, signUp } = useSignUp();
-  const router = useRouter();
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [verifying, setVerifying] = useState(false);
@@ -45,20 +42,13 @@ export default function SignUpComponent() {
     }
   };
 
-  const handleGoBack = () => {
-    router.back();
+  const handleGoogleSignUp = (strategy: OAuthStrategy) => {
+    return signUp!.authenticateWithRedirect({
+      strategy,
+      redirectUrl: '/sign-up/sso-callback',
+      redirectUrlComplete: '/dashboard',
+    });
   };
-
-  const getPasswordStrength = (password: string): number => {
-    let strength = 0;
-    if (password.length > 8) strength += 25;
-    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 25;
-    if (password.match(/\d/)) strength += 25;
-    if (password.match(/[^a-zA-Z\d]/)) strength += 25;
-    return strength;
-  };
-
-  const passwordStrength = getPasswordStrength(password);
 
   if (verifying) {
     return <OtpComponent strategy="password" />;
@@ -66,120 +56,167 @@ export default function SignUpComponent() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md p-8 space-y-6 bg-white text-gray-900 rounded-lg shadow-xl">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={handleGoBack} className=" text-gray-600 hover:text-gray-900">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Go Back
-          </Button>
-          <h2 className="text-2xl font-semibold pl-10">Sign Up</h2>
-        </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-xl"
+      >
+        <motion.h2
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-3xl font-bold text-center text-gray-800"
+        >
+          Sign Up
+        </motion.h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
-              Email Address
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-3 text-sm text-red-500 bg-red-100 border border-red-400 rounded-md"
+            >
+              {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email address
             </label>
-            <Input id="email" type="email" placeholder="Enter your email" value={emailAddress} onChange={(e) => setEmailAddress(e.target.value)} required className="w-full" />
+            <motion.input
+              whileFocus={{ scale: 1.02 }}
+              type="email"
+              id="email"
+              value={emailAddress}
+              onChange={(e) => setEmailAddress(e.target.value)}
+              placeholder="Enter your email"
+              required
+              className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
-            <div className="relative">
-              <Input
-                id="password"
+            <div className="relative mt-1">
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a password"
+                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a password"
                 required
-                className="w-full pr-10"
+                className="block w-full px-3 py-2 pr-10 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">Password strength</span>
-              <span className="text-xs font-medium" style={{ color: `hsl(${passwordStrength}, 100%, 30%)` }}>
-                {passwordStrength <= 25 ? "Weak" : passwordStrength <= 50 ? "Fair" : passwordStrength <= 75 ? "Good" : "Strong"}
-              </span>
-            </div>
-            <Progress
-              value={passwordStrength}
-              className="h-1"
-              style={{
-                background: `linear-gradient(to right, red, yellow, green)`,
-              }}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm text-gray-600">Password must contain:</p>
-            <ul className="text-xs text-gray-500 space-y-1">
-              <li className="flex items-center">
-                {password.length > 8 ? <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> : <XCircle className="w-4 h-4 text-red-500 mr-2" />}
-                At least 8 characters
-              </li>
-              <li className="flex items-center">
-                {password.match(/[A-Z]/) && password.match(/[a-z]/) ? <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> : <XCircle className="w-4 h-4 text-red-500 mr-2" />}
-                Upper and lowercase letters
-              </li>
-              <li className="flex items-center">
-                {password.match(/\d/) ? <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> : <XCircle className="w-4 h-4 text-red-500 mr-2" />}
-                At least one number
-              </li>
-              <li className="flex items-center">
-                {password.match(/[^a-zA-Z\d]/) ? <CheckCircle className="w-4 h-4 text-green-500 mr-2" /> : <XCircle className="w-4 h-4 text-red-500 mr-2" />}
-                At least one special character
-              </li>
-            </ul>
-          </div>
-
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? "Signing up..." : "Sign Up"}
-          </Button>
-        </form>
-
-        <AnimatePresence>
-          {error && (
+          {password && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="flex items-center p-4 text-red-800 bg-red-100 rounded-lg"
-              role="alert"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="space-y-2"
             >
-              <AlertCircle className="w-5 h-5 mr-2" />
-              <span className="text-sm font-medium">{error}</span>
+              <p className="text-xs text-gray-600">Password must contain:</p>
+              <ul className="text-xs text-gray-500 space-y-1">
+                <li className="flex items-center">
+                  {password.length > 8 ? (
+                    <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="w-3 h-3 text-red-500 mr-2" />
+                  )}
+                  At least 8 characters
+                </li>
+                <li className="flex items-center">
+                  {password.match(/[A-Z]/) && password.match(/[a-z]/) ? (
+                    <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="w-3 h-3 text-red-500 mr-2" />
+                  )}
+                  Upper and lowercase letters
+                </li>
+                <li className="flex items-center">
+                  {password.match(/\d/) ? (
+                    <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="w-3 h-3 text-red-500 mr-2" />
+                  )}
+                  At least one number
+                </li>
+                <li className="flex items-center">
+                  {password.match(/[^a-zA-Z\d]/) ? (
+                    <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="w-3 h-3 text-red-500 mr-2" />
+                  )}
+                  At least one special character
+                </li>
+              </ul>
             </motion.div>
           )}
-        </AnimatePresence>
 
-        <div className="text-center space-y-2">
-          <p className="text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline font-medium">
-              Log in
-            </Link>
-          </p>
-          <p className="text-xs text-gray-500">
-            By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-blue-600 hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-blue-600 hover:underline">
-              Privacy Policy
-            </Link>
-          </p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="submit"
+            disabled={isLoading}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            {isLoading ? "Signing up..." : "Sign up with Email"}
+          </motion.button>
+        </form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
         </div>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => handleGoogleSignUp('oauth_google')}
+          className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <Image
+            src="https://authjs.dev/img/providers/google.svg"
+            alt="Google logo"
+            height="24"
+            width="24"
+            className="mr-2"
+          />
+          Sign up with Google
+        </motion.button>
+
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="w-full flex justify-center"
+        >
+          <Link
+            href="/sign-in"
+            className="text-sm font-medium text-black hover:text-blue-500"
+          >
+            Already have an account? Sign In
+          </Link>
+        </motion.div>
       </motion.div>
     </div>
   );

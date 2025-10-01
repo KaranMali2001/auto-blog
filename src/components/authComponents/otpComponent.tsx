@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import {
   InputOTP,
   InputOTPGroup,
@@ -8,8 +7,8 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { useSignIn, useSignUp } from '@clerk/nextjs';
-import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -68,19 +67,23 @@ export function OtpComponent({ strategy }: { strategy: string }) {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-xl"
       >
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
+        <div className="flex items-center gap-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleGoBack}
-            className="flex items-center text-gray-600 hover:text-gray-900"
+            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Go Back
-          </Button>
-          <h2 className="text-2xl font-semibold text-center">
+            <ArrowLeft className="w-5 h-5" />
+          </motion.button>
+          <motion.h2
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-3xl font-bold text-gray-800"
+          >
             Verify Your Account
-          </h2>
+          </motion.h2>
         </div>
 
         <p className="text-center text-gray-600">
@@ -88,18 +91,22 @@ export function OtpComponent({ strategy }: { strategy: string }) {
           enter the code below to confirm your account.
         </p>
 
-        <form onSubmit={handleOtpVerification} className="space-y-6">
-          <InputOTP
-            className=" w-full max-w-md p-2 space-y-2  "
-            maxLength={6}
-            value={otp}
-            onChange={setOtp}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="p-3 text-sm text-red-500 bg-red-100 border border-red-400 rounded-md"
           >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="flex justify-center gap-2"
+            {error}
+          </motion.div>
+        )}
+
+        <form onSubmit={handleOtpVerification} className="space-y-6">
+          <div className="flex justify-center">
+            <InputOTP
+              maxLength={6}
+              value={otp}
+              onChange={setOtp}
             >
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
@@ -112,32 +119,18 @@ export function OtpComponent({ strategy }: { strategy: string }) {
                 <InputOTPSlot index={4} />
                 <InputOTPSlot index={5} />
               </InputOTPGroup>
-            </motion.div>
-          </InputOTP>
+            </InputOTP>
+          </div>
 
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-                className="flex items-center p-4 text-red-800 bg-red-100 rounded-lg"
-                role="alert"
-              >
-                <AlertCircle className="w-5 h-5 mr-2" />
-                <span className="text-sm font-medium">{error}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <Button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="submit"
-            className="w-full"
             disabled={otp.length !== 6 || isVerifying}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            {isVerifying ? 'Verifying...' : 'Verify'}
-          </Button>
+            {isVerifying ? 'Verifying...' : 'Verify Code'}
+          </motion.button>
         </form>
 
         <div className="text-center">

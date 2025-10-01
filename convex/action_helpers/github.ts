@@ -1,10 +1,10 @@
 "use node";
-import { githubApp } from "@/config/github";
 import { v } from "convex/values";
 import crypto from "crypto";
 import { Octokit } from "octokit";
 import { internal } from "../_generated/api";
 import { ActionCtx, internalAction } from "../_generated/server";
+import { githubApp } from "../config/github";
 const WEBHOOK_SECRET: string = process.env.GITHUB_WEBHOOK_SECRET!;
 
 export const getCommitDIffAction = internalAction({

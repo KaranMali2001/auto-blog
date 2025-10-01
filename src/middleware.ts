@@ -4,13 +4,18 @@ import { NextResponse } from "next/server";
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/"]);
 export default clerkMiddleware(async (auth, request) => {
   const { sessionId } = await auth();
-  if (isPublicRoute(request)) {
-    if (sessionId) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
+  console.log("Session ID:", sessionId);
+
+  // If user is authenticated and on a public route, redirect to dashboard
+  if (isPublicRoute(request) && sessionId) {
+    console.log("Redirecting to dashboard");
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+
+  // If user is not authenticated and on a protected route, redirect to sign-in
+  if (!isPublicRoute(request) && !sessionId) {
+    console.log("Redirecting to sign-in");
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 });
 export const config = {

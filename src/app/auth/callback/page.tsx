@@ -1,32 +1,64 @@
 "use client";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+
+import LoaderWithText from "@/components/ui/loading";
+import { useMutation } from "convex/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { api } from "../../../../convex/_generated/api";
 
 export function CallbackComponent() {
   const searchParams = useSearchParams();
-  const code = searchParams.get("code");
   const installation_id = searchParams.get("installation_id");
   const setup_action = searchParams.get("setup_action");
   const state = searchParams.get("state");
 
-  console.log("code", code);
-  console.log("installation_id", installation_id);
-  console.log("setup_action", setup_action);
-  console.log("state", state);
+  const updateInstallation = useMutation(api.schema.user.updateInstattionId);
+  const router = useRouter();
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!installation_id) return;
+
+    setLoading(true);
+
+    (async () => {
+      try {
+        await updateInstallation({ installationId: Number(installation_id) });
+        toast.success("Installation updated successfully. Redirecting to Dashboard...");
+        setTimeout(() => router.push("/dashboard"), 2000);
+      } catch (error: any) {
+        console.error("Failed to update installation:", error);
+        toast.error(error?.message || "Failed to update installation");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [installation_id, updateInstallation, router]);
+
+  if (loading) {
+    return <LoaderWithText text="Updating installation..." />;
+  }
+
   return (
-    <div>
-      <h1>Callback Page</h1>
-      <p>code: {code}</p>
-      <p>installation_id: {installation_id}</p>
-      <p>setup_action: {setup_action}</p>
-      <p>state: {state}</p>
+    <div className="flex flex-col items-center justify-center gap-4 p-6 text-muted-foreground min-h-screen">
+      <h1 className="text-xl font-semibold">Callback Page</h1>
+      <div className="space-y-2">
+        <p>
+          <span className="font-medium">Installation ID:</span> {installation_id ?? "N/A"}
+        </p>
+        <p>
+          <span className="font-medium">Setup Action:</span> {setup_action ?? "N/A"}
+        </p>
+        <p>
+          <span className="font-medium">State:</span> {state ?? "N/A"}
+        </p>
+      </div>
     </div>
   );
 }
+
 export default function CallBackPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <CallbackComponent />
-    </Suspense>
-  );
+  return <CallbackComponent />;
 }

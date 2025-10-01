@@ -14,6 +14,8 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as action_helpers_github from "../action_helpers/github.js";
+import type * as config_github from "../config/github.js";
+import type * as handlers_github from "../handlers/github.js";
 import type * as handlers_webhook_handlers from "../handlers/webhook_handlers.js";
 import type * as http from "../http.js";
 import type * as schema_user from "../schema/user.js";
@@ -29,6 +31,8 @@ import type * as schema_webhook from "../schema/webhook.js";
  */
 declare const fullApi: ApiFromModules<{
   "action_helpers/github": typeof action_helpers_github;
+  "config/github": typeof config_github;
+  "handlers/github": typeof handlers_github;
   "handlers/webhook_handlers": typeof handlers_webhook_handlers;
   http: typeof http;
   "schema/user": typeof schema_user;

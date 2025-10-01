@@ -7,7 +7,6 @@ import { httpAction } from "../_generated/server";
 const CLERK_WEBHOOK_SECRET: string = process.env.CLERK_WEBHOOK_SECRET!;
 
 export const githubWebhook = httpAction(async (ctx, req) => {
-  console.log("Inside Github Webhook");
   try {
     const body: string = await req.text();
     const success = await ctx.runAction(internal.action_helpers.github.VerifyGithubWebhookAction, {
@@ -23,7 +22,7 @@ export const githubWebhook = httpAction(async (ctx, req) => {
 
     if (event === "push") {
       await ctx.runMutation(internal.schema.webhook.storeAndSchedule, {
-        webhooK_platform: "github",
+        webhook_platform: "github",
         webhook_event: event,
         webhook_status: "pending",
         webhook_data: payload,
@@ -62,6 +61,7 @@ export const clerkWebhook = httpAction(async (ctx, req) => {
 
       await ctx.runMutation(internal.schema.user.createUser, {
         clerkId: id,
+        email: evt.data.email_addresses[0].email_address,
         name: evt.data.first_name || undefined,
         imageUrl: evt.data.image_url,
         createdAt: Date.now().toString(),

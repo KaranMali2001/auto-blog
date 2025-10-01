@@ -4,7 +4,7 @@ import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
 
 export const webhookSchema = defineTable({
-  webhooK_platform: v.union(v.literal("github"), v.literal("clerk")),
+  webhook_platform: v.union(v.literal("github"), v.literal("clerk")),
   webhook_event: v.string(),
   webhook_status: v.union(v.literal("success"), v.literal("failed"), v.literal("pending")),
   webhook_data: v.any(),
@@ -15,7 +15,7 @@ export const webhookSchema = defineTable({
 });
 export const storeAndSchedule = internalMutation({
   args: {
-    webhooK_platform: v.union(v.literal("github"), v.literal("clerk")),
+    webhook_platform: v.union(v.literal("github"), v.literal("clerk")),
     webhook_event: v.string(),
     webhook_status: v.union(v.literal("success"), v.literal("failed"), v.literal("pending")),
     webhook_data: v.any(),
@@ -24,9 +24,9 @@ export const storeAndSchedule = internalMutation({
     installation_id: v.number(),
   },
   handler: async (ctx, args) => {
-    const { webhooK_platform, webhook_event, webhook_status, webhook_data, installation_id } = args;
+    const { webhook_platform, webhook_event, webhook_status, webhook_data, installation_id } = args;
     const webhook = await ctx.db.insert("webhooks", {
-      webhooK_platform,
+      webhook_platform,
       webhook_event,
       webhook_status,
       webhook_data,
