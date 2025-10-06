@@ -14,10 +14,14 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as action_helpers_github from "../action_helpers/github.js";
+import type * as action_helpers_openRouter from "../action_helpers/openRouter.js";
 import type * as config_github from "../config/github.js";
+import type * as config_openRouter from "../config/openRouter.js";
 import type * as handlers_github from "../handlers/github.js";
 import type * as handlers_webhook_handlers from "../handlers/webhook_handlers.js";
 import type * as http from "../http.js";
+import type * as schema_commit from "../schema/commit.js";
+import type * as schema_repo from "../schema/repo.js";
 import type * as schema_user from "../schema/user.js";
 import type * as schema_webhook from "../schema/webhook.js";
 
@@ -31,10 +35,14 @@ import type * as schema_webhook from "../schema/webhook.js";
  */
 declare const fullApi: ApiFromModules<{
   "action_helpers/github": typeof action_helpers_github;
+  "action_helpers/openRouter": typeof action_helpers_openRouter;
   "config/github": typeof config_github;
+  "config/openRouter": typeof config_openRouter;
   "handlers/github": typeof handlers_github;
   "handlers/webhook_handlers": typeof handlers_webhook_handlers;
   http: typeof http;
+  "schema/commit": typeof schema_commit;
+  "schema/repo": typeof schema_repo;
   "schema/user": typeof schema_user;
   "schema/webhook": typeof schema_webhook;
 }>;

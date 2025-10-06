@@ -33,7 +33,7 @@ export const storeAndSchedule = internalMutation({
       webhook_createdAt: Date.now().toString(),
       webhook_updatedAt: Date.now().toString(),
     });
-    await ctx.scheduler.runAfter(0, internal.action_helpers.github.getCommitDIffAction, {
+    await ctx.scheduler.runAfter(0, internal.action_helpers.github.getCommitDiffAction, {
       installationId: installation_id,
       github_url: webhook_data.repository.html_url,
       commitSha: webhook_data.after,

@@ -1,45 +1,101 @@
 "use node";
+import { shouldExcludeFile } from "@/utils/utils";
 import { v } from "convex/values";
 import crypto from "crypto";
-import { Octokit } from "octokit";
 import { internal } from "../_generated/api";
 import { ActionCtx, internalAction } from "../_generated/server";
 import { githubApp } from "../config/github";
+import { singleCommitPrompt } from "../config/openRouter";
 const WEBHOOK_SECRET: string = process.env.GITHUB_WEBHOOK_SECRET!;
 
-export const getCommitDIffAction = internalAction({
-  args: { installationId: v.number(), github_url: v.string(), commitSha: v.string(), id: v.id("webhooks") },
+export const getCommitDiffAction = internalAction({
+  args: {
+    installationId: v.number(),
+    github_url: v.string(),
+    commitSha: v.string(),
+    id: v.id("webhooks"),
+  },
   handler: async (ctx: ActionCtx, args) => {
     try {
-      const owner = args.github_url.split("/")[3];
-      const repo = args.github_url.split("/")[4];
+      const parts = args.github_url.split("/");
+      const owner = parts[3];
+      const repo = parts[4];
+      if (!owner || !repo) {
+        throw new Error(`Invalid github_url: ${args.github_url}`);
+      }
+
       const app = githubApp();
-      const tempOctokit = await app.getInstallationOctokit(args.installationId);
-      const tokenResponse = await tempOctokit.request("POST /app/installations/{installation_id}/access_tokens", {
-        installation_id: args.installationId,
-      });
+      const installationOctokit = await app.getInstallationOctokit(args.installationId);
 
-      const octokit = new Octokit({ auth: tokenResponse.data.token });
-
-      const response = await octokit.request("GET /repos/{owner}/{repo}/commits/{ref}", {
+      const { data: commit } = await installationOctokit.rest.repos.getCommit({
         owner,
         repo,
         ref: args.commitSha,
-        headers: {
-          accept: "application/vnd.github.v3.diff",
-        },
       });
-      console.log("response Git Diff Not saving Yet", response.data);
+
+      const files = commit.files ?? [];
+
+      // Filter out excluded files
+      const relevantFiles = files.filter((f) => {
+        return Boolean(f.filename) && !shouldExcludeFile(f.filename, f);
+      });
+
+      // Extract patch parts, drop undefined ones
+      const patches: string[] = [];
+      for (const f of relevantFiles) {
+        if (f.patch) {
+          patches.push(f.patch);
+        }
+      }
+      const filteredDiff = patches.join("\n\n");
+
+      const filesChanged = relevantFiles.map((f) => f.filename);
+
+      const stats = {
+        additions: relevantFiles.reduce((sum, f) => sum + (f.additions ?? 0), 0),
+        deletions: relevantFiles.reduce((sum, f) => sum + (f.deletions ?? 0), 0),
+      };
+
+      const user = await ctx.runQuery(internal.schema.user.getUserByinstallationId, {
+        installationId: args.installationId,
+      });
+      const newCommit = await ctx.runMutation(internal.schema.commit.createCommit, {
+        commitSha: args.commitSha,
+        commitMessage: commit.commit.message,
+        commitRepositoryUrl: args.github_url,
+        commitAuthor: commit.commit.author?.name || "Unknown",
+
+        userId: user._id,
+      });
+
       await ctx.runMutation(internal.schema.webhook.updateStatus, {
         id: args.id,
         status: "success",
       });
+      const commitSummary = await ctx.runAction(internal.action_helpers.openRouter.getSummary, {
+        commitMessage: commit.commit.message,
+        filesChanged,
+        stats,
+        fileContent: filteredDiff,
+        prompt: singleCommitPrompt,
+      });
+      if (!commitSummary) {
+        return null;
+      }
+
+      await ctx.runMutation(internal.schema.commit.updateCommit, {
+        commitId: newCommit,
+        summarizedCommitDiff: commitSummary,
+      });
     } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      console.error("Error in getCommitDiffAction:", errMsg, error);
+
       await ctx.runMutation(internal.schema.webhook.updateStatus, {
         id: args.id,
         status: "failed",
       });
-      console.error("Error getting commit diff:", error);
+
       return null;
     }
   },
