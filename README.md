@@ -5,21 +5,23 @@ A Next.js application that integrates with GitHub to automatically generate blog
 ## Features
 
 - **Authentication System**: Clerk-based authentication with email/password and OTP verification
-- **GitHub Integration**: GitHub App with OAuth and webhook support for installation events
+- **GitHub Integration**: GitHub App with OAuth and webhook support for installation and commit events
+- **AI-Powered Commit Analysis**: Automated commit summarization using OpenRouter LLM integration
 - **Real-time Backend**: Convex for real-time data synchronization and serverless functions
 - **Modern UI**: Built with Radix UI components, Tailwind CSS, and Framer Motion animations
 - **Type Safety**: Full TypeScript support with Zod schema validation
 - **Protected Routes**: Middleware-based authentication protection
+- **Smart File Filtering**: Excludes irrelevant files (lock files, build artifacts, binaries) from analysis
 
 ## Tech Stack
 
 - **Framework**: Next.js 15.5.4 (App Router)
 - **Authentication**: Clerk
 - **Backend**: Convex (real-time database + serverless functions)
+- **AI/LLM**: OpenRouter API with OpenAI SDK (Google Gemini 2.0 Flash)
 - **UI Components**: Radix UI, Lucide Icons
 - **Styling**: Tailwind CSS 4.x
 - **Animations**: Framer Motion
-- **State Management**: TanStack React Query
 - **Form Handling**: Input OTP, custom auth components
 - **GitHub API**: Octokit, JWT-based app authentication
 
@@ -41,12 +43,14 @@ auto-blog/
 │   ├── github/                   # GitHub API utilities
 │   ├── lib/                      # Utility functions
 │   ├── types/                    # TypeScript type definitions
+│   ├── utils/                    # Utility functions (file filtering, etc.)
 │   ├── env.ts                    # Environment variable validation
 │   └── middleware.ts             # Route protection middleware
 ├── convex/                       # Convex backend
-│   ├── schema/                   # Database schemas
+│   ├── schema/                   # Database schemas (users, webhooks, commits, repos)
 │   ├── handlers/                 # Webhook handlers
-│   ├── action_helpers/           # GitHub action helpers
+│   ├── action_helpers/           # GitHub & OpenRouter action helpers
+│   ├── config/                   # GitHub App & OpenRouter config
 │   ├── auth.config.ts            # Convex auth configuration
 │   └── http.ts                   # HTTP endpoints
 └── components.json               # Shadcn UI configuration
@@ -67,10 +71,10 @@ auto-blog/
 Create a `.env.local` file in the root directory:
 
 ```env
-# Next.js
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NEXT_PUBLIC_APP_NAME=Auto Blog
-NODE_ENV=development
+# Convex
+CONVEX_DEPLOYMENT=your_deployment_name
+NEXT_PUBLIC_CONVEX_URL=your_convex_url
+NEXT_PUBLIC_CONVEX_API_URL=your_convex_api_url
 
 # GitHub App
 GITHUB_WEBHOOK_SECRET=your_webhook_secret
@@ -80,12 +84,15 @@ GITHUB_CLIENT_SECRET=your_client_secret
 GITHUB_PRIVATE_KEY=your_private_key
 
 # Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 CLERK_SECRET_KEY=your_clerk_secret
 CLERK_WEBHOOK_SECRET=your_clerk_webhook_secret
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 
-# Convex
-NEXT_PUBLIC_CONVEX_URL=your_convex_url
+# Server
+NEXT_PUBLIC_API_URL=http://localhost:3000
+
+# OpenRouter (for AI commit summarization)
+OPENROUTER_API_KEY=your_openrouter_api_key
 ```
 
 ### Installation
@@ -151,12 +158,15 @@ pnpm dev
 4. Protected routes check authentication via middleware
 5. JWT tokens manage GitHub App installation access
 
-## GitHub Integration
+## GitHub Integration & AI Analysis Pipeline
 
-- GitHub App installation webhook triggers Convex actions
-- Installation tokens generated using JWT authentication
-- Webhook events processed and stored in Convex
-- Commit diff analysis for blog content generation
+1. **Webhook Reception**: GitHub App receives push events with commit data
+2. **Event Storage**: Webhook events stored in Convex with status tracking
+3. **Commit Processing**: Scheduled action fetches full commit diff using Octokit
+4. **Smart Filtering**: Filters out irrelevant files (lock files, binaries, build artifacts, files >500 lines changed)
+5. **AI Summarization**: OpenRouter LLM (Google Gemini 2.0 Flash) generates detailed, story-driven commit summaries
+6. **Data Persistence**: Commit metadata and AI-generated summaries stored in Convex
+7. **Future Aggregation**: Summaries designed to be combined into blog posts, LinkedIn updates, or Twitter threads
 
 ## Development
 
@@ -164,17 +174,18 @@ The application uses:
 
 - **Server Components** for optimal performance
 - **Server Actions** for secure mutations
-- **React Query** for client-side data fetching
-- **Convex** for real-time backend operations
+- **Convex** for real-time backend operations and scheduled actions
 - **Middleware** for authentication protection
+- **OpenRouter API** for LLM-powered commit analysis
 
 ## Security
 
 - All secrets stored in environment variables
-- `.env*` files ignored by git
+- `.env.local` files ignored by git (`.env.example` provided as template)
 - JWT-based GitHub App authentication
 - Webhook signature verification
 - Protected API routes
+- Smart file filtering prevents processing sensitive files
 
 ## Current Status & TODO
 
@@ -183,46 +194,62 @@ The application uses:
 - [x] Project infrastructure setup
 - [x] Clerk authentication UI components (sign-in/sign-up with OTP)
 - [x] GitHub App integration with JWT authentication
-- [x] Convex backend configuration with schemas
-- [x] GitHub webhook endpoint receiving events
+- [x] Convex backend configuration with schemas (users, webhooks, commits, repos)
+- [x] GitHub webhook endpoint receiving push events
 - [x] Environment variable validation
 - [x] Protected routes middleware
 - [x] UI component library setup
+- [x] OpenRouter LLM integration for commit summarization
+- [x] Commit diff fetching and processing pipeline
+- [x] Smart file filtering (excludes lock files, binaries, build artifacts)
+- [x] Automated commit analysis with AI-generated summaries
+- [x] Database schemas for commits and repositories
+- [x] Installation token generation and management
 
 ### 🚧 In Progress / TODO
 
 #### High Priority
 
-- [ ] **Test Clerk Authentication Flow**
+- [x] **Test End-to-End Commit Analysis Flow**
+  - [x] Verify webhook receives push events
+  - [x] Test commit diff extraction
+  - [x] Validate file filtering logic
+  - [x] Confirm OpenRouter API responses
+  - [x] Check commit storage in database
+  - [x] Test error handling and retry logic
 
-  - [ ] Verify email/password sign-up
-  - [ ] Test OTP verification
-  - [ ] Validate GitHub OAuth integration
-  - [ ] Confirm webhook sync to Convex
-  - [ ] Test protected routes middleware
-
-- [ ] **Process GitHub Webhook Events**
-  - [ ] Handle installation events
-  - [ ] Process repository access changes
-  - [ ] Store installation data in Convex
-  - [ ] Generate and refresh installation tokens
-  - [ ] Add webhook event validation and logging
+- [ ] **Content Aggregation System**
+  - [ ] Design multi-commit aggregation logic
+  - [ ] Create blog post template engine
+  - [ ] Build LinkedIn update formatter
+  - [ ] Implement Twitter thread generator
+  - [ ] Add time-based grouping (daily/weekly summaries)
 
 #### Medium Priority
 
-- [ ] Blog content generation from commits
-- [ ] Commit analysis and parsing
-- [ ] Content template system
-- [ ] Automated blog post creation
-- [ ] Repository selection UI
-- [ ] Dashboard for monitoring GitHub activities
+- [ ] **Dashboard & UI**
+  - [ ] Repository selection interface
+  - [ ] Commit history viewer with AI summaries
+  - [ ] Generated content preview and editing
+  - [ ] Publishing workflow (draft → review → publish)
+  - [ ] Settings page for customization
+
+- [ ] **Content Publishing**
+  - [ ] Blog platform integrations (Dev.to, Medium, Hashnode)
+  - [ ] LinkedIn API integration for auto-posting
+  - [ ] Twitter API integration for thread publishing
+  - [ ] Manual export to Markdown
+  - [ ] Scheduling system for timed posts
 
 #### Low Priority
 
-- [ ] Add comprehensive error handling
-- [ ] Implement rate limiting
-- [ ] Add logging and monitoring
-- [ ] Write unit and integration tests
-- [ ] Add API documentation
-- [ ] Optimize performance and caching
-- [ ] Add admin panel
+- [ ] Advanced error handling and logging
+- [ ] Rate limiting for API endpoints
+- [ ] Monitoring and observability (Sentry, analytics)
+- [ ] Unit and integration tests
+- [ ] API documentation
+- [ ] Performance optimization and caching
+- [ ] Admin panel for user management
+- [ ] Support for multiple LLM providers
+- [ ] Custom prompt templates
+- [ ] Content tone/style customization
