@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 // export const MODEL = "deepseek/deepseek-chat-v3.1:free"; //took 18sec
-// export const MODEL = "openai/gpt-oss-20b:free"; //took 15 seconds
-export const MODEL = "google/gemini-2.0-flash-exp:free"; //6secs
+export const MODEL = "openai/gpt-oss-20b:free"; //took 15 seconds
+// export const MODEL = "google/gemini-2.0-flash-exp:free"; //6secs
 export const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: `${process.env.OPENROUTER_API_KEY}`,

@@ -1,7 +1,7 @@
 "use client";
 
 import LoaderWithText from "@/components/ui/loading";
-import { useMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ export function CallbackComponent() {
   const setup_action = searchParams.get("setup_action");
   const state = searchParams.get("state");
 
-  const updateInstallation = useMutation(api.schema.user.updateInstattionId);
+  const updateInstallation = useAction(api.schema.user.updateInstattionId);
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);

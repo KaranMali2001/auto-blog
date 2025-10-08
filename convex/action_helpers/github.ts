@@ -56,15 +56,19 @@ export const getCommitDiffAction = internalAction({
         deletions: relevantFiles.reduce((sum, f) => sum + (f.deletions ?? 0), 0),
       };
 
-      const user = await ctx.runQuery(internal.schema.user.getUserByinstallationId, {
+      const user = await ctx.runQuery(internal.schema.user.getUserByinstallationId, { installationId: args.installationId });
+      const repoid = await ctx.runQuery(internal.schema.repo.getRepoByInstallation, {
         installationId: args.installationId,
       });
+      if (!repoid) {
+        throw new Error("Repo not found");
+      }
       const newCommit = await ctx.runMutation(internal.schema.commit.createCommit, {
         commitSha: args.commitSha,
         commitMessage: commit.commit.message,
         commitRepositoryUrl: args.github_url,
         commitAuthor: commit.commit.author?.name || "Unknown",
-
+        repoId: repoid._id,
         userId: user._id,
       });
 
@@ -111,5 +115,26 @@ export const VerifyGithubWebhookAction = internalAction({
       return false;
     }
     return true;
+  },
+});
+export const getInstallationRepo = internalAction({
+  args: {
+    installationId: v.number(),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const github = githubApp();
+    const octokit = await github.getInstallationOctokit(args.installationId);
+    const repos = await octokit.request("GET /installation/repositories", {
+      installation_id: args.installationId,
+    });
+    for (const repo of repos.data.repositories) {
+      await ctx.runMutation(internal.schema.repo.createRepo, {
+        name: repo.full_name,
+        repoUrl: repo.html_url,
+        installationId: args.installationId,
+        userId: args.userId,
+      });
+    }
   },
 });

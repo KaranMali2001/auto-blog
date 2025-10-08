@@ -19,7 +19,8 @@ export const githubWebhook = httpAction(async (ctx, req) => {
     const payload: GitHubWebhookPayload = JSON.parse(body);
 
     const event: string | null = req.headers.get("x-github-event");
-
+    console.log("events", event);
+    console.log("payload", payload);
     if (event === "push") {
       await ctx.runMutation(internal.schema.webhook.storeAndSchedule, {
         webhook_platform: "github",
@@ -30,7 +31,21 @@ export const githubWebhook = httpAction(async (ctx, req) => {
         webhook_updatedAt: Date.now().toString(),
         installation_id: payload.installation.id,
       });
+
       return new Response("ok", { status: 200 });
+    }
+    if (event === "installation") {
+      if (payload.action === "deleted" || payload.action === "updated") {
+        console.log("inside the if");
+        const res = await ctx.runMutation(internal.schema.user.updateInstalltionId, {
+          action: payload.action,
+          installationId: payload.installation.id,
+          repositories: payload.repositories.map((r) => r.full_name),
+        });
+        if (res == false) {
+          return new Response("User not found", { status: 400 });
+        }
+      }
     }
     return new Response("ok", { status: 200 });
   } catch (error) {

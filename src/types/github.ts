@@ -6,7 +6,10 @@ export interface GitHubCommit {
     email: string;
   };
 }
-
+export interface GithubRepoForInstallation {
+  id: number;
+  full_name: string;
+}
 export interface GitHubRepository {
   name: string;
   owner: {
@@ -19,7 +22,9 @@ export interface GitHubInstallation {
 }
 
 export interface GitHubWebhookPayload {
+  action: "updated" | "deleted";
   installation: GitHubInstallation;
   repository: GitHubRepository;
   commits: GitHubCommit[];
+  repositories: GithubRepoForInstallation[];
 }

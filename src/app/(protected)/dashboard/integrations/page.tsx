@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LoaderWithText from "@/components/ui/loading";
 import { axiosInstance } from "@/lib/axios";
-import { api } from "../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
 
 export default function DashboardPage() {
   const { getToken, isLoaded } = useAuth();
@@ -30,7 +30,7 @@ export default function DashboardPage() {
         const response = await axiosInstance.get("/api/installationUrl", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
+        console.log("res", response);
         if (response.status === 200) {
           setAuthUrl(response.data.authUrl);
         } else {
