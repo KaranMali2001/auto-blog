@@ -1,20 +1,21 @@
 "use client";
 
+import { CommitCard } from "@/components/dashboard/commit-card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { LoadingState } from "@/components/dashboard/loading-state";
-import { useQuery } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { GitBranch, GitCommit, ExternalLink } from "lucide-react";
-import { CommitCard } from "@/components/dashboard/commit-card";
 import { extractTags, renderMarkdown } from "@/components/dashboard/markdown-renderer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMutation, useQuery } from "convex/react";
+import { ExternalLink, GitBranch, GitCommit } from "lucide-react";
+import { api } from "../../../../convex/_generated/api";
 
 export default function DashboardPage() {
   const commits = useQuery(api.schema.commit.getCommits);
   const repos = useQuery(api.schema.repo.getRepos);
-
+  const deleteCommit = useMutation(api.schema.commit.deleteCommit);
+  const updateSummary = useMutation(api.schema.commit.updateSummary);
   if (commits === undefined || repos === undefined) {
     return <LoadingState />;
   }
@@ -52,12 +53,7 @@ export default function DashboardPage() {
                       </CardHeader>
                       <CardContent>
                         <Button variant="outline" size="sm" className="w-full" asChild>
-                          <a
-                            href={repo.repoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2"
-                          >
+                          <a href={repo.repoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                             <ExternalLink className="h-4 w-4" />
                             View Repository
                           </a>
@@ -91,6 +87,10 @@ export default function DashboardPage() {
                           commit={commit}
                           extractTags={extractTags}
                           renderMarkdown={renderMarkdown}
+                          onDelete={(commitId) => deleteCommit({ commitId })}
+                          onUpdateSummary={(commitId, summarizedCommitDiff) =>
+                            updateSummary({ commitId, summarizedCommitDiff })
+                          }
                         />
                       ))}
                     </div>

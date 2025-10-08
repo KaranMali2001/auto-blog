@@ -1,6 +1,6 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
-import { internalMutation, query } from "../_generated/server";
+import { internalMutation, mutation, query } from "../_generated/server";
 
 export const commitSchema = defineTable({
   commitSha: v.string(),
@@ -49,7 +49,56 @@ export const getCommits = query({
       .withIndex("byUserId", (q) => q.eq("userId", user._id))
       .collect();
 
-    console.log("commits", commits);
     return commits;
+  },
+});
+export const deleteCommit = mutation({
+  args: { commitId: v.id("commits") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("User not authenticated");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const commit = await ctx.db.get(args.commitId);
+    if (!commit) {
+      throw new Error("Commit not found");
+    }
+    if (commit.userId !== user._id) {
+      throw new Error("Unauthorized");
+    }
+    await ctx.db.delete(args.commitId);
+  },
+});
+export const updateSummary = mutation({
+  args: { commitId: v.id("commits"), summarizedCommitDiff: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("User not authenticated");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const commit = await ctx.db.get(args.commitId);
+    if (!commit) {
+      throw new Error("Commit not found");
+    }
+    if (commit.userId !== user._id) {
+      throw new Error("Unauthorized");
+    }
+    await ctx.db.patch(args.commitId, {
+      summarizedCommitDiff: args.summarizedCommitDiff,
+    });
   },
 });

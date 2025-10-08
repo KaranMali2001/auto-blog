@@ -13,8 +13,10 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as action_helpers_gemini from "../action_helpers/gemini.js";
 import type * as action_helpers_github from "../action_helpers/github.js";
 import type * as action_helpers_openRouter from "../action_helpers/openRouter.js";
+import type * as config_gemini from "../config/gemini.js";
 import type * as config_github from "../config/github.js";
 import type * as config_openRouter from "../config/openRouter.js";
 import type * as handlers_github from "../handlers/github.js";
@@ -34,8 +36,10 @@ import type * as schema_webhook from "../schema/webhook.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "action_helpers/gemini": typeof action_helpers_gemini;
   "action_helpers/github": typeof action_helpers_github;
   "action_helpers/openRouter": typeof action_helpers_openRouter;
+  "config/gemini": typeof config_gemini;
   "config/github": typeof config_github;
   "config/openRouter": typeof config_openRouter;
   "handlers/github": typeof handlers_github;

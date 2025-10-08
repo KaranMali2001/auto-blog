@@ -76,7 +76,7 @@ export const getCommitDiffAction = internalAction({
         id: args.id,
         status: "success",
       });
-      const commitSummary = await ctx.runAction(internal.action_helpers.openRouter.getSummary, {
+      const commitSummary = await ctx.runAction(internal.action_helpers.gemini.getSummary, {
         commitMessage: commit.commit.message,
         filesChanged,
         stats,

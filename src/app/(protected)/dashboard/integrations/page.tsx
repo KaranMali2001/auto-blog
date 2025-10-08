@@ -30,7 +30,7 @@ export default function DashboardPage() {
         const response = await axiosInstance.get("/api/installationUrl", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("res", response);
+
         if (response.status === 200) {
           setAuthUrl(response.data.authUrl);
         } else {

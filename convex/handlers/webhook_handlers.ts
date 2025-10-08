@@ -19,8 +19,7 @@ export const githubWebhook = httpAction(async (ctx, req) => {
     const payload: GitHubWebhookPayload = JSON.parse(body);
 
     const event: string | null = req.headers.get("x-github-event");
-    console.log("events", event);
-    console.log("payload", payload);
+
     if (event === "push") {
       await ctx.runMutation(internal.schema.webhook.storeAndSchedule, {
         webhook_platform: "github",
@@ -36,7 +35,6 @@ export const githubWebhook = httpAction(async (ctx, req) => {
     }
     if (event === "installation") {
       if (payload.action === "deleted" || payload.action === "updated") {
-        console.log("inside the if");
         const res = await ctx.runMutation(internal.schema.user.updateInstalltionId, {
           action: payload.action,
           installationId: payload.installation.id,
