@@ -3,7 +3,7 @@
 import LoaderWithText from "@/components/ui/loading";
 import { useAction } from "convex/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../../../convex/_generated/api";
 
@@ -60,5 +60,7 @@ export function CallbackComponent() {
 }
 
 export default function CallBackPage() {
-  return <CallbackComponent />;
+  <Suspense fallback={<LoaderWithText text="Loading..." />}>
+    <CallbackComponent />
+  </Suspense>;
 }

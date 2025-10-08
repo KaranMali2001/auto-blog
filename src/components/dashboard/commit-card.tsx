@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, GitCommit, Trash2, User2 } from "lucide-react";
-import React from "react";
+import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
+import { Calendar, Edit, GitCommit, Trash2, User2 } from "lucide-react";
+import React, { useState } from "react";
 import { Id } from "../../../convex/_generated/dataModel";
 
 interface CommitCardProps {
@@ -31,12 +32,24 @@ interface CommitCardProps {
 }
 
 export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUpdateSummary }: CommitCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(commit.summarizedCommitDiff || "");
   const tags = extractTags(commit.summarizedCommitDiff || "");
   const date = new Date(commit._creationTime).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+
+  const handleSave = () => {
+    onUpdateSummary(commit._id, editedContent);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditedContent(commit.summarizedCommitDiff || "");
+    setIsEditing(false);
+  };
 
   return (
     <div className="p-6 hover:bg-muted/30 transition-colors">
@@ -62,11 +75,11 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* {commit.summarizedCommitDiff && !isEditing && (
+            {commit.summarizedCommitDiff && !isEditing && (
               <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="text-muted-foreground hover:text-foreground">
                 <Edit className="h-4 w-4" />
               </Button>
-            )} */}
+            )}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" size="icon">
@@ -101,10 +114,9 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
         )}
 
         {/* Summary */}
-        {/* {isEditing ? (
+        {isEditing ? (
           <RichTextEditor content={editedContent} onChange={setEditedContent} onSave={handleSave} onCancel={handleCancel} />
-        ) :  */}
-        {commit.summarizedCommitDiff ? (
+        ) : commit.summarizedCommitDiff ? (
           <details className="group">
             <summary className="cursor-pointer text-sm font-medium text-primary hover:underline list-none flex items-center gap-2">
               <GitCommit className="h-4 w-4" />

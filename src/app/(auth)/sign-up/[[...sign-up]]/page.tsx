@@ -3,7 +3,7 @@
 import { OtpComponent } from "@/components/authComponents/otpComponent";
 import { useSignUp } from "@clerk/nextjs";
 import { OAuthStrategy } from "@clerk/types";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { CheckCircle, Eye, EyeOff, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,8 +45,8 @@ export default function SignUpComponent() {
   const handleGoogleSignUp = (strategy: OAuthStrategy) => {
     return signUp!.authenticateWithRedirect({
       strategy,
-      redirectUrl: '/sign-up/sso-callback',
-      redirectUrlComplete: '/dashboard',
+      redirectUrl: "/sign-up/sso-callback",
+      redirectUrlComplete: "/dashboard",
     });
   };
 
@@ -56,32 +56,16 @@ export default function SignUpComponent() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-xl"
-      >
-        <motion.h2
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-3xl font-bold text-center text-gray-800"
-        >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-xl">
+        <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-3xl font-bold text-center text-gray-800">
           Sign Up
         </motion.h2>
 
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="p-3 text-sm text-red-500 bg-red-100 border border-red-400 rounded-md"
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {error && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 text-sm text-red-500 bg-red-100 border border-red-400 rounded-md">
+            {error}
+          </motion.div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -115,54 +99,30 @@ export default function SignUpComponent() {
                 required
                 className="block w-full px-3 py-2 pr-10 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-              >
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600">
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
           {password && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="space-y-2"
-            >
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-2">
               <p className="text-xs text-gray-600">Password must contain:</p>
               <ul className="text-xs text-gray-500 space-y-1">
                 <li className="flex items-center">
-                  {password.length > 8 ? (
-                    <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
-                  ) : (
-                    <XCircle className="w-3 h-3 text-red-500 mr-2" />
-                  )}
+                  {password.length > 8 ? <CheckCircle className="w-3 h-3 text-green-500 mr-2" /> : <XCircle className="w-3 h-3 text-red-500 mr-2" />}
                   At least 8 characters
                 </li>
                 <li className="flex items-center">
-                  {password.match(/[A-Z]/) && password.match(/[a-z]/) ? (
-                    <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
-                  ) : (
-                    <XCircle className="w-3 h-3 text-red-500 mr-2" />
-                  )}
+                  {password.match(/[A-Z]/) && password.match(/[a-z]/) ? <CheckCircle className="w-3 h-3 text-green-500 mr-2" /> : <XCircle className="w-3 h-3 text-red-500 mr-2" />}
                   Upper and lowercase letters
                 </li>
                 <li className="flex items-center">
-                  {password.match(/\d/) ? (
-                    <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
-                  ) : (
-                    <XCircle className="w-3 h-3 text-red-500 mr-2" />
-                  )}
+                  {password.match(/\d/) ? <CheckCircle className="w-3 h-3 text-green-500 mr-2" /> : <XCircle className="w-3 h-3 text-red-500 mr-2" />}
                   At least one number
                 </li>
                 <li className="flex items-center">
-                  {password.match(/[^a-zA-Z\d]/) ? (
-                    <CheckCircle className="w-3 h-3 text-green-500 mr-2" />
-                  ) : (
-                    <XCircle className="w-3 h-3 text-red-500 mr-2" />
-                  )}
+                  {password.match(/[^a-zA-Z\d]/) ? <CheckCircle className="w-3 h-3 text-green-500 mr-2" /> : <XCircle className="w-3 h-3 text-red-500 mr-2" />}
                   At least one special character
                 </li>
               </ul>
@@ -192,28 +152,15 @@ export default function SignUpComponent() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => handleGoogleSignUp('oauth_google')}
+          onClick={() => handleGoogleSignUp("oauth_google")}
           className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          <Image
-            src="https://authjs.dev/img/providers/google.svg"
-            alt="Google logo"
-            height="24"
-            width="24"
-            className="mr-2"
-          />
+          <Image src="https://authjs.dev/img/providers/google.svg" alt="Google logo" height="24" width="24" className="mr-2" />
           Sign up with Google
         </motion.button>
 
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="w-full flex justify-center"
-        >
-          <Link
-            href="/sign-in"
-            className="text-sm font-medium text-black hover:text-blue-500"
-          >
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full flex justify-center">
+          <Link href="/sign-in" className="text-sm font-medium text-black hover:text-blue-500">
             Already have an account? Sign In
           </Link>
         </motion.div>

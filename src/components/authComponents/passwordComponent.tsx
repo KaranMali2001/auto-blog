@@ -3,18 +3,18 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSignIn } from '@clerk/nextjs';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function PasswordComponent({ email }: { email: string }) {
   const { isLoaded, signIn, setActive } = useSignIn();
   const [password, setPassword] = useState('');
-  const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,21 +96,20 @@ export default function PasswordComponent({ email }: { email: string }) {
           </Button>
         </form>
 
-        <AnimatePresence>
-          {error && (
+        {error && (
+          <div className="overflow-hidden">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
               className="flex items-center p-4 text-red-800 bg-red-100 rounded-lg"
               role="alert"
             >
-              <AlertCircle className="w-5 h-5 mr-2" />
+              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
               <span className="text-sm font-medium">{error}</span>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
 
         <div className="text-center">
           <Button

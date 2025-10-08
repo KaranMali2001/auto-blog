@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@mdxeditor/editor/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -183,4 +184,110 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* MDX Editor Dark Theme */
+.mdx-editor-container {
+  min-height: 300px;
+}
+
+.dark-theme.dark-editor {
+  --baseBg: var(--background);
+  --baseText: var(--foreground);
+  --accentBase: var(--primary);
+  --accentBgSubtle: var(--muted);
+  --admonitionTipBg: var(--muted);
+  color-scheme: dark;
+}
+
+.dark-theme .mdxeditor {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.dark-theme .mdxeditor-toolbar {
+  background: var(--muted) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.dark-theme .mdxeditor-toolbar button,
+.dark-theme .mdxeditor-toolbar select {
+  background: transparent !important;
+  color: var(--foreground) !important;
+  border-color: transparent !important;
+}
+
+.dark-theme .mdxeditor-toolbar button:hover {
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+.dark-theme .mdxeditor-toolbar button[data-state="on"],
+.dark-theme .mdxeditor-toolbar button[aria-pressed="true"] {
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+.dark-theme .mdxeditor-toolbar svg {
+  color: var(--foreground) !important;
+  fill: currentColor !important;
+}
+
+.dark-theme .mdxeditor-root-contenteditable {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  padding: 1rem !important;
+}
+
+.dark-theme .mdxeditor-popup-container {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3) !important;
+}
+
+.dark-theme .mdxeditor-popup-container input,
+.dark-theme .mdxeditor-popup-container button {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.dark-theme .mdxeditor-popup-container button:hover {
+  background: var(--muted) !important;
+}
+
+/* CodeMirror Dark Theme */
+.dark-theme .cm-editor {
+  background: var(--muted) !important;
+  color: var(--foreground) !important;
+}
+
+.dark-theme .cm-content {
+  color: var(--foreground) !important;
+  caret-color: var(--foreground) !important;
+}
+
+.dark-theme .cm-gutters {
+  background: var(--card) !important;
+  color: var(--muted-foreground) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+.dark-theme .cm-line {
+  color: var(--foreground) !important;
+}
+
+.dark-theme .cm-cursor {
+  border-left-color: var(--foreground) !important;
+}
+
+.dark-theme .cm-selectionBackground {
+  background: var(--accent) !important;
+}
+
+/* Selection Colors */
+.dark-theme .mdxeditor-root-contenteditable ::selection,
+.dark-theme .cm-content ::selection {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
 }

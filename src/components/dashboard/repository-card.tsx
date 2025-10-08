@@ -1,17 +1,12 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, GitBranch } from "lucide-react";
-import { CommitCard } from "./commit-card";
 import React from "react";
+import { Id } from "../../../convex/_generated/dataModel";
+import { CommitCard } from "./commit-card";
 
 interface Commit {
-  _id: string;
+  _id: Id<"commits">;
   commitMessage: string;
   commitAuthor?: string;
   commitSha: string;
@@ -32,13 +27,7 @@ interface RepositoryCardProps {
   renderMarkdown: (text: string) => React.ReactElement[];
 }
 
-export function RepositoryCard({
-  repoUrl,
-  repoName,
-  commits,
-  extractTags,
-  renderMarkdown,
-}: RepositoryCardProps) {
+export function RepositoryCard({ repoUrl, repoName, commits, extractTags, renderMarkdown }: RepositoryCardProps) {
   return (
     <Card>
       <CardHeader className="border-b bg-muted/50">
@@ -53,12 +42,7 @@ export function RepositoryCard({
             </div>
           </div>
           <Button variant="outline" size="sm" asChild>
-            <a
-              href={repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2"
-            >
+            <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
               <ExternalLink className="h-4 w-4" />
               View Repo
             </a>
@@ -70,9 +54,18 @@ export function RepositoryCard({
           {commits.map((commit) => (
             <CommitCard
               key={commit._id}
-              commit={commit}
+              commit={{
+                _id: commit._id,
+                commitMessage: commit.commitMessage,
+                commitAuthor: commit.commitAuthor,
+                commitSha: commit.commitSha,
+                summarizedCommitDiff: commit.summarizedCommitDiff,
+                _creationTime: commit._creationTime,
+              }}
               extractTags={extractTags}
               renderMarkdown={renderMarkdown}
+              onDelete={() => {}}
+              onUpdateSummary={() => Promise.resolve()}
             />
           ))}
         </div>
