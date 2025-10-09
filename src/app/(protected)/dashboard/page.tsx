@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryWithStatus } from "@/app/Providers";
 import { CommitCard } from "@/components/dashboard/commit-card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { EmptyState } from "@/components/dashboard/empty-state";
@@ -7,16 +8,19 @@ import { LoadingState } from "@/components/dashboard/loading-state";
 import { extractTags, renderMarkdown } from "@/components/dashboard/markdown-renderer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { ExternalLink, GitBranch, GitCommit } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { api } from "../../../../convex/_generated/api";
 
 export default function DashboardPage() {
-  const commits = useQuery(api.schema.commit.getCommits);
-  const repos = useQuery(api.schema.repo.getRepos);
+  const { data: commits, isPending: commitsPending } = useQueryWithStatus(api.schema.commit.getCommits);
+  const { data: repos, isPending: reposPending } = useQueryWithStatus(api.schema.repo.getRepos);
   const deleteCommit = useMutation(api.schema.commit.deleteCommit);
   const updateSummary = useMutation(api.schema.commit.updateSummary);
-  if (commits === undefined || repos === undefined) {
+  const router = useRouter();
+
+  if (commitsPending || reposPending || !commits || !repos) {
     return <LoadingState />;
   }
 
@@ -24,7 +28,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 space-y-8">
         <DashboardHeader />
-
+        <Button onClick={() => router.push("/dashboard/integrations")}>Go TO Integrations</Button>
         {repos.length === 0 && commits.length === 0 ? (
           <EmptyState />
         ) : (
@@ -88,9 +92,7 @@ export default function DashboardPage() {
                           extractTags={extractTags}
                           renderMarkdown={renderMarkdown}
                           onDelete={(commitId) => deleteCommit({ commitId })}
-                          onUpdateSummary={(commitId, summarizedCommitDiff) =>
-                            updateSummary({ commitId, summarizedCommitDiff })
-                          }
+                          onUpdateSummary={(commitId, summarizedCommitDiff) => updateSummary({ commitId, summarizedCommitDiff })}
                         />
                       ))}
                     </div>

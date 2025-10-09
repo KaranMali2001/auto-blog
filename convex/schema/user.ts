@@ -2,6 +2,7 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { action, internalMutation, internalQuery, query } from "../_generated/server";
+import { aggregateByCommitCount, aggregateByCommitSummary, aggregateByRepoCount } from "../aggregation";
 
 export const UserSchema = defineTable({
   clerkId: v.string(),
@@ -148,5 +149,33 @@ export const getUserByClerkId = internalQuery({
       throw new Error("User not found");
     }
     return user;
+  },
+});
+export const getUserIntegrationStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("User not authenticated");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const [commitCount, repoCount, summaryCount] = await Promise.all([
+      aggregateByCommitCount.count(ctx, { namespace: user._id }),
+      aggregateByRepoCount.count(ctx, { namespace: user._id }),
+      aggregateByCommitSummary.count(ctx, { namespace: user._id }),
+    ]);
+    return {
+      commitCount,
+      repoCount,
+      summaryCount,
+    };
   },
 });

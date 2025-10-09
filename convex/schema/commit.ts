@@ -1,6 +1,8 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "../_generated/server";
+import { internal } from "../_generated/api";
+import { internalMutation } from "../_generated/server";
+import { authenticatedMutation, authenticatedQuery } from "../lib/auth";
 
 export const commitSchema = defineTable({
   commitSha: v.string(),
@@ -30,75 +32,60 @@ export const updateCommit = internalMutation({
     return commit;
   },
 });
-export const getCommits = query({
+export const getCommits = authenticatedQuery({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("User not authenticated");
-    }
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) {
-      throw new Error("User not found");
-    }
     const commits = await ctx.db
       .query("commits")
-      .withIndex("byUserId", (q) => q.eq("userId", user._id))
+      .withIndex("byUserId", (q) => q.eq("userId", ctx.user._id))
       .collect();
 
     return commits;
   },
 });
-export const deleteCommit = mutation({
+export const deleteCommit = authenticatedMutation({
   args: { commitId: v.id("commits") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("User not authenticated");
-    }
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) {
-      throw new Error("User not found");
-    }
     const commit = await ctx.db.get(args.commitId);
-    if (!commit) {
-      throw new Error("Commit not found");
-    }
-    if (commit.userId !== user._id) {
+    if (!commit || commit.userId !== ctx.user._id) {
       throw new Error("Unauthorized");
     }
     await ctx.db.delete(args.commitId);
   },
 });
-export const updateSummary = mutation({
+export const updateSummary = authenticatedMutation({
   args: { commitId: v.id("commits"), summarizedCommitDiff: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("User not authenticated");
-    }
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) {
-      throw new Error("User not found");
-    }
     const commit = await ctx.db.get(args.commitId);
-    if (!commit) {
-      throw new Error("Commit not found");
-    }
-    if (commit.userId !== user._id) {
+    if (!commit || commit.userId !== ctx.user._id) {
       throw new Error("Unauthorized");
     }
     await ctx.db.patch(args.commitId, {
       summarizedCommitDiff: args.summarizedCommitDiff,
     });
+  },
+});
+export const regenerateSummary = authenticatedMutation({
+  args: { commitId: v.id("commits"), userInput: v.string() },
+  handler: async (ctx, args) => {
+    const dbCommit = await ctx.db.get(args.commitId);
+    if (!dbCommit || dbCommit.userId !== ctx.user._id) {
+      throw new Error("Commit not found");
+    }
+    if (!ctx.user.installationId) {
+      throw new Error("User not connected to github");
+    }
+    await ctx.scheduler.runAfter(0, internal.action_helpers.commit.regenerateSummary, {
+      installationId: ctx.user.installationId,
+      commitSha: dbCommit.commitSha,
+      owner: dbCommit.commitRepositoryUrl.split("/")[3],
+      repo: dbCommit.commitRepositoryUrl.split("/")[4],
+      commitId: args.commitId,
+      previousSummary: dbCommit.summarizedCommitDiff || "",
+      userInput: args.userInput,
+    });
+    return {
+      message: "Regenerating summary...",
+    };
   },
 });

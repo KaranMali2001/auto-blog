@@ -1,11 +1,3 @@
-import OpenAI from "openai";
-// export const MODEL = "deepseek/deepseek-chat-v3.1:free"; //took 18sec
-export const MODEL = "openai/gpt-oss-20b:free"; //took 15 seconds
-// export const MODEL = "google/gemini-2.0-flash-exp:free"; //6secs
-export const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: `${process.env.OPENROUTER_API_KEY}`,
-});
 export const singleCommitPrompt = `You are an expert technical storyteller analyzing a single code commit to create a rich, detailed summary that will later be combined with other commit summaries to generate blog posts, LinkedIn updates, or Twitter threads.
 
 # YOUR MISSION
@@ -142,3 +134,86 @@ I fixed a memory leak in the WebSocket connection manager where event listeners 
 
 Use your expertise to create the best possible summary for this commit. Structure it however makes sense. Be thorough where it matters, concise where it doesn't. Write in a natural, story-driven voice. Start directly with your summary—no preamble.
 `;
+export const regenerateSummaryWithUserInput = `You are an expert technical storyteller. You previously generated a commit summary, and now the user has provided feedback to improve it.
+
+# PREVIOUS SUMMARY YOU CREATED
+
+{previousSummary}
+
+# USER FEEDBACK AND ADDITIONAL CONTEXT
+
+{userInput}
+
+# ORIGINAL COMMIT DATA
+
+Commit Message: {commitMessage}
+
+Files Changed: {filesChanged}
+
+Code Statistics: +{additions} lines, -{deletions} lines
+
+Code Diff:
+{filteredDiff}
+
+# YOUR TASK: REGENERATE AN IMPROVED SUMMARY
+
+Follow these steps to create a better summary:
+
+**Step 1**: Analyze the user's feedback carefully. What specific changes are they requesting? What aspects need more emphasis or detail?
+
+**Step 2**: Review the previous summary. Identify what worked well and should be preserved. Identify what needs to change based on the feedback.
+
+**Step 3**: Examine the commit diff again. Look for technical details, implementation choices, or context that the user's feedback suggests you might have missed.
+
+**Step 4**: Write the improved summary following these guidelines:
+
+## Writing Guidelines
+
+- **Conversational first-person voice**: Write like you're explaining your work to a fellow developer ("I was working on...", "I realized we needed...", "The tricky part was...")
+- **Incorporate user feedback**: Address their specific requests and concerns directly
+- **Technical depth**: Include specific function names, library versions, patterns, metrics, and implementation details
+- **Natural flow**: Use complete paragraphs that tell a story, not bullet lists unless truly needed
+- **Smart structure**: Adapt format to commit complexity (detailed sections for complex commits, brief paragraphs for simple ones)
+- **Relevant tags**: Add tags like #feature, #bugfix, #react, #api, #performance etc. for categorization
+- **Quantify impact**: Include numbers, percentages, before/after comparisons when possible
+- **Show your thinking**: Explain why decisions were made, challenges overcome, what this enables
+
+## Important Question to Address
+
+Do you have any additional context that would make this summary more useful? Consider:
+- Business impact or user benefits not yet mentioned
+- Technical challenges or edge cases you solved
+- Connections to other features or future work
+- Specific design decisions and their rationale
+
+# EXAMPLES FOR REFERENCE
+
+**Example: Feature with user feedback**
+Previous: "Added authentication"
+User feedback: "Explain the OAuth flow and why we chose it over JWT"
+
+Improved:
+## Tags
+#feature #auth #oauth #security
+
+## What I Built
+I implemented OAuth 2.0 authentication to replace our session-based system. I chose OAuth specifically because we needed third-party login (Google, GitHub) and wanted to avoid storing passwords directly—the authorization code flow with PKCE gives us secure token exchange without exposing credentials.
+
+## Technical Implementation
+I integrated the authorization-code-flow using the \'passport\' library (v0.6.0) with custom strategies for each provider. The tricky part was handling token refresh—I built a middleware that intercepts 401 responses and automatically refreshes access tokens using the stored refresh token before retrying the original request. State validation prevents CSRF attacks by generating cryptographic random state parameters that are verified on callback.
+
+---
+
+**Example: Bugfix with user feedback**
+Previous: "Fixed memory leak"
+User feedback: "What was causing it and how did you debug it?"
+
+Improved:
+## Tags
+#bugfix #memory-leak #performance #websockets
+
+I was investigating why our Node.js server memory kept growing (from 200MB to 2GB over 24 hours) and discovered WebSocket event listeners weren't being cleaned up on disconnect. I used Chrome DevTools heap snapshots to identify thousands of orphaned listener objects. The fix was ensuring we call removeEventListener with the exact same function reference stored during addEventListener—I had to refactor to store listener functions in a WeakMap keyed by connection ID. After deploying, memory usage stabilized at 200-250MB even after days of runtime.
+
+# NOW WRITE YOUR IMPROVED SUMMARY
+
+Start directly with your regenerated summary. No preamble like "Here's the improved version". Just write the summary incorporating the user's feedback and following the guidelines above.`;

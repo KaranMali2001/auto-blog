@@ -1,3 +1,4 @@
+import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,9 +12,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RichTextEditor } from "@/components/dashboard/rich-text-editor";
-import { Calendar, Edit, GitCommit, Trash2, User2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "convex/react";
+import { Calendar, Edit, GitCommit, Loader2, RefreshCw, Trash2, User2 } from "lucide-react";
 import React, { useState } from "react";
+import { toast } from "sonner";
+import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 
 interface CommitCardProps {
@@ -33,6 +38,10 @@ interface CommitCardProps {
 
 export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUpdateSummary }: CommitCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
+  const [userInput, setUserInput] = useState("");
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const regenerateSummary = useMutation(api.schema.commit.regenerateSummary);
   const [editedContent, setEditedContent] = useState(commit.summarizedCommitDiff || "");
   const tags = extractTags(commit.summarizedCommitDiff || "");
   const date = new Date(commit._creationTime).toLocaleDateString("en-US", {
@@ -49,6 +58,25 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
   const handleCancel = () => {
     setEditedContent(commit.summarizedCommitDiff || "");
     setIsEditing(false);
+  };
+
+  const handleRegenerate = async () => {
+    if (!userInput.trim()) return;
+
+    setIsRegenerating(true);
+    toast.info("Regenerating summary...");
+
+    try {
+      await regenerateSummary({ commitId: commit._id, userInput });
+      setIsRegenerateDialogOpen(false);
+      setUserInput("");
+      toast.success("Summary regenerated successfully!");
+    } catch (error) {
+      console.error("Failed to regenerate summary:", error);
+      toast.error("Failed to regenerate summary. Please try again.");
+    } finally {
+      setIsRegenerating(false);
+    }
   };
 
   return (
@@ -76,9 +104,38 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
           </div>
           <div className="flex items-center gap-2">
             {commit.summarizedCommitDiff && !isEditing && (
-              <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="text-muted-foreground hover:text-foreground">
-                <Edit className="h-4 w-4" />
-              </Button>
+              <>
+                <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="text-muted-foreground hover:text-foreground">
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Dialog open={isRegenerateDialogOpen} onOpenChange={setIsRegenerateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Regenerate Summary</DialogTitle>
+                      <DialogDescription>Provide instructions for how you'd like the AI to regenerate this commit summary.</DialogDescription>
+                    </DialogHeader>
+                    <Textarea
+                      placeholder="E.g., 'Make it more detailed', 'Focus on the performance improvements', 'Use simpler language'..."
+                      value={userInput}
+                      onChange={(e) => setUserInput(e.target.value)}
+                      className="min-h-[100px]"
+                    />
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsRegenerateDialogOpen(false)} disabled={isRegenerating}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleRegenerate} disabled={!userInput.trim() || isRegenerating}>
+                        {isRegenerating ? "Regenerating..." : "Regenerate"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -121,6 +178,12 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
             <summary className="cursor-pointer text-sm font-medium text-primary hover:underline list-none flex items-center gap-2">
               <GitCommit className="h-4 w-4" />
               View commit summary
+              {isRegenerating && (
+                <span className="flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-2 py-1 rounded-md">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Regenerating...
+                </span>
+              )}
             </summary>
             <div className="mt-4 pl-6 border-l-2 border-border">
               <div className="prose prose-sm max-w-none text-sm">{renderMarkdown(commit.summarizedCommitDiff)}</div>

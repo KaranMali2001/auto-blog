@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { internal } from "../_generated/api";
 import { ActionCtx, internalAction } from "../_generated/server";
 import { githubApp } from "../config/github";
-import { singleCommitPrompt } from "../config/openRouter";
+import { singleCommitPrompt } from "../config/prompts";
 const WEBHOOK_SECRET: string = process.env.GITHUB_WEBHOOK_SECRET!;
 
 export const getCommitDiffAction = internalAction({
@@ -23,39 +23,12 @@ export const getCommitDiffAction = internalAction({
       if (!owner || !repo) {
         throw new Error(`Invalid github_url: ${args.github_url}`);
       }
-
-      const app = githubApp();
-      const installationOctokit = await app.getInstallationOctokit(args.installationId);
-
-      const { data: commit } = await installationOctokit.rest.repos.getCommit({
+      const { commit, filesChanged, stats, filteredDiff } = await ctx.runAction(internal.action_helpers.github.getCommitData, {
+        installationId: args.installationId,
+        commitSha: args.commitSha,
         owner,
         repo,
-        ref: args.commitSha,
       });
-
-      const files = commit.files ?? [];
-
-      // Filter out excluded files
-      const relevantFiles = files.filter((f) => {
-        return Boolean(f.filename) && !shouldExcludeFile(f.filename, f);
-      });
-
-      // Extract patch parts, drop undefined ones
-      const patches: string[] = [];
-      for (const f of relevantFiles) {
-        if (f.patch) {
-          patches.push(f.patch);
-        }
-      }
-      const filteredDiff = patches.join("\n\n");
-
-      const filesChanged = relevantFiles.map((f) => f.filename);
-
-      const stats = {
-        additions: relevantFiles.reduce((sum, f) => sum + (f.additions ?? 0), 0),
-        deletions: relevantFiles.reduce((sum, f) => sum + (f.deletions ?? 0), 0),
-      };
-
       const user = await ctx.runQuery(internal.schema.user.getUserByinstallationId, { installationId: args.installationId });
       const repoid = await ctx.runQuery(internal.schema.repo.getRepoByInstallation, {
         installationId: args.installationId,
@@ -136,5 +109,53 @@ export const getInstallationRepo = internalAction({
         userId: args.userId,
       });
     }
+  },
+});
+export const getCommitData = internalAction({
+  args: {
+    installationId: v.number(),
+    commitSha: v.string(),
+    owner: v.string(),
+    repo: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const app = githubApp();
+    const installationOctokit = await app.getInstallationOctokit(args.installationId);
+
+    const { data: commit } = await installationOctokit.rest.repos.getCommit({
+      owner: args.owner,
+      repo: args.repo,
+      ref: args.commitSha,
+    });
+
+    const files = commit.files ?? [];
+
+    // Filter out excluded files
+    const relevantFiles = files.filter((f) => {
+      return Boolean(f.filename) && !shouldExcludeFile(f.filename, f);
+    });
+
+    // Extract patch parts, drop undefined ones
+    const patches: string[] = [];
+    for (const f of relevantFiles) {
+      if (f.patch) {
+        patches.push(f.patch);
+      }
+    }
+    const filteredDiff = patches.join("\n\n");
+
+    const filesChanged = relevantFiles.map((f) => f.filename);
+
+    const stats = {
+      additions: relevantFiles.reduce((sum, f) => sum + (f.additions ?? 0), 0),
+      deletions: relevantFiles.reduce((sum, f) => sum + (f.deletions ?? 0), 0),
+    };
+
+    return {
+      commit,
+      filesChanged,
+      stats,
+      filteredDiff,
+    };
   },
 });
