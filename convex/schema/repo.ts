@@ -1,6 +1,8 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
-import { internalMutation, internalQuery, query } from "../_generated/server";
+import { internalMutation, internalQuery } from "../_generated/server";
+import { aggregateByRepoCount } from "../aggregation";
+import { authenticatedQuery } from "../lib/auth";
 
 export const repoSchema = defineTable({
   name: v.string(),
@@ -14,27 +16,23 @@ export const repoSchema = defineTable({
 export const createRepo = internalMutation({
   args: { name: v.string(), repoUrl: v.string(), installationId: v.number(), userId: v.id("users") },
   handler: async (ctx, args) => {
-    const repo = ctx.db.insert("repos", args);
-    return repo;
+    const repoId = await ctx.db.insert("repos", args);
+    const repo = await ctx.db.get(repoId);
+
+    if (!repo) {
+      throw new Error("Failed to retrieve newly created repo");
+    }
+
+    await aggregateByRepoCount.insert(ctx, repo);
+    return repoId;
   },
 });
-export const getRepos = query({
+export const getRepos = authenticatedQuery({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("User not authenticated");
-    }
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) {
-      throw new Error("User not found");
-    }
     return ctx.db
       .query("repos")
-      .withIndex("byUserId", (q) => q.eq("userId", user._id))
+      .withIndex("byUserId", (q) => q.eq("userId", ctx.user._id))
       .collect();
   },
 });

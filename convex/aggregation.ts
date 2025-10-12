@@ -32,3 +32,12 @@ export const aggregateByCommitSummary = new TableAggregate<{
   sortKey: (d: Doc<"commits">) => d._creationTime,
   sumValue: (d: Doc<"commits">) => (d.summarizedCommitDiff ? 1 : 0),
 });
+export const aggregateByTotalBlogCount = new TableAggregate<{
+  DataModel: DataModel;
+  TableName: "blogs";
+  Namespace: Id<"users">;
+  Key: number;
+}>(components.blogCountAggregate, {
+  namespace: (d: Doc<"blogs">) => d.userId,
+  sortKey: (d: Doc<"blogs">) => d._creationTime,
+});

@@ -2,6 +2,7 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
+import { aggregateByCommitCount } from "../aggregation";
 import { authenticatedMutation, authenticatedQuery } from "../lib/auth";
 
 export const commitSchema = defineTable({
@@ -19,7 +20,12 @@ export const commitSchema = defineTable({
 export const createCommit = internalMutation({
   args: { commitSha: v.string(), commitMessage: v.string(), commitAuthor: v.string(), commitRepositoryUrl: v.string(), repoId: v.id("repos"), userId: v.id("users") },
   handler: async (ctx, args) => {
-    const commit = ctx.db.insert("commits", args);
+    const commitId = await ctx.db.insert("commits", args);
+    const commit = await ctx.db.get(commitId);
+    if (!commit) {
+      throw new Error("Failed to retrieve newly created commit");
+    }
+    await aggregateByCommitCount.insert(ctx, commit);
     return commit;
   },
 });
@@ -50,6 +56,7 @@ export const deleteCommit = authenticatedMutation({
     if (!commit || commit.userId !== ctx.user._id) {
       throw new Error("Unauthorized");
     }
+    await aggregateByCommitCount.delete(ctx, commit);
     await ctx.db.delete(args.commitId);
   },
 });
@@ -87,5 +94,21 @@ export const regenerateSummary = authenticatedMutation({
     return {
       message: "Regenerating summary...",
     };
+  },
+});
+
+export const getCommitsByIds = authenticatedQuery({
+  args: { commitIds: v.array(v.id("commits")) },
+  handler: async (ctx, args) => {
+    const commits = await Promise.all(
+      args.commitIds.map(async (commitId) => {
+        const commit = await ctx.db.get(commitId);
+        if (!commit || commit.userId !== ctx.user._id) {
+          return null;
+        }
+        return commit;
+      })
+    );
+    return commits.filter((commit): commit is NonNullable<typeof commit> => commit !== null);
   },
 });

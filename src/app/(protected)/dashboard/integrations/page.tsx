@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const { getToken, isLoaded } = useAuth();
   const { data: user, isPending } = useQueryWithStatus(api.schema.user.getCurrentUser);
   const { data: stats, isPending: statsPending } = useQueryWithStatus(api.schema.user.getUserIntegrationStats);
+
   const [authUrl, setAuthUrl] = useState<string>("");
   const [fetchError, setFetchError] = useState<string>("");
 
@@ -129,6 +130,17 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-3xl font-bold">{stats.summaryCount}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-border/50 bg-card hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardDescription className="flex items-center gap-2">
+                      <GitBranch className="h-4 w-4" />
+                      Total Blogs Generated
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-3xl font-bold">{stats.blogCount}</p>
                   </CardContent>
                 </Card>
               </>

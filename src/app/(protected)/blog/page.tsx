@@ -1,0 +1,137 @@
+"use client";
+
+import { useQueryWithStatus } from "@/app/Providers";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMutation } from "convex/react";
+import { Calendar, FileText, Loader2, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+
+export default function BlogPage() {
+  const { data: blogs, isPending, error } = useQueryWithStatus(api.schema.blog.getBlogs);
+  const deleteBlog = useMutation(api.schema.blog.deleteBlog);
+  const router = useRouter();
+
+  const handleDelete = async (blogId: Id<"blogs">) => {
+    try {
+      await deleteBlog({ blogId });
+      toast.success("Blog deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete blog:", error);
+      toast.error("Failed to delete blog. Please try again.");
+    }
+  };
+
+  if (isPending) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto p-6">
+          <Card className="p-8">
+            <div className="text-center text-muted-foreground">
+              <p>Error loading blogs. Please try again.</p>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">My Blog Posts</h1>
+            <p className="text-muted-foreground">Manage and view your generated blog posts</p>
+          </div>
+          <Button onClick={() => router.push("/dashboard")} variant="outline">
+            <FileText className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </div>
+
+        {blogs && blogs.length === 0 ? (
+          <Card className="p-8">
+            <div className="text-center text-muted-foreground">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg">No blog posts yet</p>
+              <p className="text-sm">Generate your first blog post from your commits</p>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {blogs?.map((blog) => (
+              <Card key={blog._id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg line-clamp-2">{blog.title}</CardTitle>
+                      <CardDescription className="mt-2">
+                        {blog.platform === "twitter" ? "Twitter/X" : "LinkedIn"} • {blog.commitIds.length} commit{blog.commitIds.length !== 1 ? "s" : ""}
+                      </CardDescription>
+                    </div>
+                    <Badge variant={blog.status === "completed" ? "default" : "secondary"}>
+                      {blog.status}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  
+                  {blog.options && (
+                    <div className="space-y-1">
+                      {blog.options.toneType && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Tone:</span> {blog.options.toneType}
+                        </div>
+                      )}
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Length:</span> {blog.options.length}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => router.push(`/blog/${blog._id}`)}
+                    >
+                      View Blog
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => handleDelete(blog._id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

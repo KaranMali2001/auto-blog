@@ -61,8 +61,8 @@ export const getCommitDiffAction = internalAction({
       }
 
       await ctx.runMutation(internal.schema.commit.updateCommit, {
-        commitId: newCommit,
         summarizedCommitDiff: commitSummary,
+        commitId: newCommit._id,
       });
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);

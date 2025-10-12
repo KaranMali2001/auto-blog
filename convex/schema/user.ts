@@ -1,8 +1,9 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { action, internalMutation, internalQuery, query } from "../_generated/server";
-import { aggregateByCommitCount, aggregateByCommitSummary, aggregateByRepoCount } from "../aggregation";
+import { action, internalMutation, internalQuery } from "../_generated/server";
+import { aggregateByCommitCount, aggregateByCommitSummary, aggregateByRepoCount, aggregateByTotalBlogCount } from "../aggregation";
+import { authenticatedQuery } from "../lib/auth";
 
 export const UserSchema = defineTable({
   clerkId: v.string(),
@@ -77,21 +78,10 @@ export const getUserByinstallationId = internalQuery({
     return user;
   },
 });
-export const getCurrentUser = query({
+export const getCurrentUser = authenticatedQuery({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("User not authenticated");
-    }
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) {
-      throw new Error("User not found");
-    }
-    return user;
+    return ctx.user;
   },
 });
 export const updateInstalltionId = internalMutation({
@@ -151,31 +141,20 @@ export const getUserByClerkId = internalQuery({
     return user;
   },
 });
-export const getUserIntegrationStats = query({
+export const getUserIntegrationStats = authenticatedQuery({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("User not authenticated");
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerkId", (q) => q.eq("clerkId", identity.subject))
-      .unique();
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const [commitCount, repoCount, summaryCount] = await Promise.all([
-      aggregateByCommitCount.count(ctx, { namespace: user._id }),
-      aggregateByRepoCount.count(ctx, { namespace: user._id }),
-      aggregateByCommitSummary.count(ctx, { namespace: user._id }),
+    const [commitCount, repoCount, summaryCount, blogCount] = await Promise.all([
+      aggregateByCommitCount.count(ctx, { namespace: ctx.user._id }),
+      aggregateByRepoCount.count(ctx, { namespace: ctx.user._id }),
+      aggregateByCommitSummary.count(ctx, { namespace: ctx.user._id }),
+      aggregateByTotalBlogCount.count(ctx, { namespace: ctx.user._id }),
     ]);
     return {
       commitCount,
       repoCount,
       summaryCount,
+      blogCount,
     };
   },
 });

@@ -1,0 +1,155 @@
+import { defineTable } from "convex/server";
+import { v } from "convex/values";
+import { internal } from "../_generated/api";
+import { internalMutation } from "../_generated/server";
+import { aggregateByTotalBlogCount } from "../aggregation";
+import { authenticatedMutation, authenticatedQuery } from "../lib/auth";
+
+export const blogSchema = defineTable({
+  title: v.string(),
+  content: v.string(),
+  status: v.union(v.literal("pending"), v.literal("completed")),
+  options: v.optional(
+    v.object({
+      toneType: v.optional(v.union(v.literal("technical"), v.literal("business"), v.literal("hiring manager"), v.string())),
+      length: v.union(v.literal("short"), v.literal("medium"), v.literal("long")),
+    })
+  ),
+  totalGenerations: v.number(),
+  commitIds: v.array(v.id("commits")),
+  platform: v.union(v.literal("twitter"), v.literal("linkedin")),
+  userId: v.id("users"),
+  createdAt: v.string(),
+  updatedAt: v.string(),
+}).index("byUserId", ["userId"]);
+export const createBlog = authenticatedMutation({
+  args: {
+    title: v.optional(v.string()),
+    commitIds: v.array(v.id("commits")),
+    platform: v.union(v.literal("twitter"), v.literal("linkedin")),
+    options: v.optional(
+      v.object({
+        toneType: v.optional(v.union(v.literal("technical"), v.literal("business"), v.literal("hiring manager"), v.string())),
+        length: v.union(v.literal("short"), v.literal("medium"), v.literal("long")),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const commits = await ctx.db
+      .query("commits")
+      .withIndex("byUserId", (q) => q.eq("userId", ctx.user._id))
+      .collect();
+
+    // Filter commits to only include those the user owns
+    const filtered = commits.filter((c) => args.commitIds.includes(c._id));
+    if (filtered.length !== args.commitIds.length) {
+      throw new Error("Unauthorized: Some commits not found or not owned by user");
+    }
+
+    // Prepare commit data for the blog generation
+    const commitData = filtered.map((commit) => ({
+      commitMessage: commit.commitMessage,
+      summarizedCommitDiff: commit.summarizedCommitDiff,
+      commitAuthor: commit.commitAuthor || "Unknown Author",
+      repoName: commit.commitRepositoryUrl,
+      commitDate: new Date(commit._creationTime).toISOString(),
+    }));
+    // Create blog entry in database
+    const blogId = await ctx.db.insert("blogs", {
+      title: args.title || "Untitled Post",
+      content: "", // Will be updated when action completes
+      status: "pending",
+      options: {
+        toneType: args.options?.toneType || "professional",
+        length: args.options?.length || "medium",
+      },
+      commitIds: args.commitIds,
+      totalGenerations: 0,
+      platform: args.platform,
+      userId: ctx.user._id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const blog = await ctx.db.get(blogId);
+    if (!blog) {
+      throw new Error("Failed to retrieve newly created blog");
+    }
+    await aggregateByTotalBlogCount.insert(ctx, blog);
+    await ctx.scheduler.runAfter(0, internal.action_helpers.gemini.generateBlog, {
+      blogId: blogId,
+      commits: commitData,
+      platform: args.platform,
+      options: args.options,
+      totalGeneration: 0,
+    });
+
+    return blogId;
+  },
+});
+export const updateBlogContent = internalMutation({
+  args: {
+    blogId: v.id("blogs"),
+    content: v.string(),
+    title: v.string(),
+    totalGeneration: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.blogId, {
+      content: args.content,
+      status: "completed",
+      title: args.title,
+      totalGenerations: args.totalGeneration,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+});
+export const getBlogById = authenticatedQuery({
+  args: {
+    blogId: v.id("blogs"),
+  },
+  handler: async (ctx, args) => {
+    const blog = await ctx.db.get(args.blogId);
+    if (!blog || blog.userId !== ctx.user._id) {
+      throw new Error("Blog not found or unauthorized");
+    }
+    return blog;
+  },
+});
+
+export const getBlogs = authenticatedQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("blogs")
+      .withIndex("byUserId", (q) => q.eq("userId", ctx.user._id))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const deleteBlog = authenticatedMutation({
+  args: {
+    blogId: v.id("blogs"),
+  },
+  handler: async (ctx, args) => {
+    const blog = await ctx.db.get(args.blogId);
+    if (!blog || blog.userId !== ctx.user._id) {
+      throw new Error("Blog not found or unauthorized");
+    }
+    await ctx.db.delete(args.blogId);
+  },
+});
+
+export const updateBlog = authenticatedMutation({
+  args: {
+    blogId: v.id("blogs"),
+    title: v.string(),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.blogId, {
+      title: args.title,
+      content: args.content,
+    });
+  },
+});
