@@ -26,7 +26,9 @@ export default function SignIn() {
         return;
       } else {
         if (result.status === "needs_first_factor") {
-          const firstFactor = result.supportedFirstFactors.find((factor) => factor.strategy === "password" || factor.strategy === "email_code");
+          const firstFactor = result.supportedFirstFactors.find(
+            (factor) => factor.strategy === "password" || factor.strategy === "email_code",
+          );
 
           if (!firstFactor) {
             setError("Unable to proceed with authentication");

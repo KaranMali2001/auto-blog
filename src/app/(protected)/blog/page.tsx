@@ -83,12 +83,11 @@ export default function BlogPage() {
                     <div className="flex-1">
                       <CardTitle className="text-lg line-clamp-2">{blog.title}</CardTitle>
                       <CardDescription className="mt-2">
-                        {blog.platform === "twitter" ? "Twitter/X" : "LinkedIn"} • {blog.commitIds.length} commit{blog.commitIds.length !== 1 ? "s" : ""}
+                        {blog.platform === "twitter" ? "Twitter/X" : "LinkedIn"} • {blog.commitIds.length} commit
+                        {blog.commitIds.length !== 1 ? "s" : ""}
                       </CardDescription>
                     </div>
-                    <Badge variant={blog.status === "completed" ? "default" : "secondary"}>
-                      {blog.status}
-                    </Badge>
+                    <Badge variant={blog.status === "completed" ? "default" : "secondary"}>{blog.status}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -96,7 +95,7 @@ export default function BlogPage() {
                     <Calendar className="h-4 w-4" />
                     <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
                   </div>
-                  
+
                   {blog.options && (
                     <div className="space-y-1">
                       {blog.options.toneType && (
@@ -111,18 +110,10 @@ export default function BlogPage() {
                   )}
 
                   <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => router.push(`/blog/${blog._id}`)}
-                    >
+                    <Button size="sm" className="flex-1" onClick={() => router.push(`/blog/${blog._id}`)}>
                       View Blog
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => handleDelete(blog._id)}
-                    >
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(blog._id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -135,3 +126,4 @@ export default function BlogPage() {
     </div>
   );
 }
+

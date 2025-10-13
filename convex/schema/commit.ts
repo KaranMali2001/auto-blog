@@ -18,7 +18,14 @@ export const commitSchema = defineTable({
   .index("byUserId", ["userId"])
   .index("byRepoId", ["repoId"]);
 export const createCommit = internalMutation({
-  args: { commitSha: v.string(), commitMessage: v.string(), commitAuthor: v.string(), commitRepositoryUrl: v.string(), repoId: v.id("repos"), userId: v.id("users") },
+  args: {
+    commitSha: v.string(),
+    commitMessage: v.string(),
+    commitAuthor: v.string(),
+    commitRepositoryUrl: v.string(),
+    repoId: v.id("repos"),
+    userId: v.id("users"),
+  },
   handler: async (ctx, args) => {
     const commitId = await ctx.db.insert("commits", args);
     const commit = await ctx.db.get(commitId);
@@ -107,7 +114,7 @@ export const getCommitsByIds = authenticatedQuery({
           return null;
         }
         return commit;
-      })
+      }),
     );
     return commits.filter((commit): commit is NonNullable<typeof commit> => commit !== null);
   },

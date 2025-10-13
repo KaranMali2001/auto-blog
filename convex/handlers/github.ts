@@ -9,7 +9,7 @@ export const getInstallationUrl = httpAction(async (ctx) => {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Vary": "origin",
+        Vary: "origin",
       }),
     });
   }
@@ -30,7 +30,7 @@ export const getInstallationUrl = httpAction(async (ctx) => {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Vary": "origin",
+      Vary: "origin",
     }),
   });
 });

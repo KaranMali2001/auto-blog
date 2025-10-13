@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 const LoadingSpinner = () => {
   return (
@@ -14,7 +14,7 @@ const LoadingSpinner = () => {
         transition={{
           duration: 1.5,
           repeat: Infinity,
-          ease: 'easeInOut',
+          ease: "easeInOut",
         }}
       />
       <motion.div
@@ -23,7 +23,7 @@ const LoadingSpinner = () => {
         transition={{
           duration: 1,
           repeat: Infinity,
-          ease: 'linear',
+          ease: "linear",
         }}
       />
     </div>

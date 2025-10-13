@@ -22,12 +22,9 @@ export function renderMarkdown(text: string): React.ReactElement[] {
     if (line.startsWith("```")) {
       if (inCodeBlock) {
         elements.push(
-          <pre
-            key={`code-${index}`}
-            className="bg-muted/50 border border-border p-4 rounded-lg my-3 overflow-x-auto"
-          >
+          <pre key={`code-${index}`} className="bg-muted/50 border border-border p-4 rounded-lg my-3 overflow-x-auto">
             <code className="text-sm font-mono">{codeLines.join("\n")}</code>
-          </pre>
+          </pre>,
         );
         codeLines = [];
         inCodeBlock = false;
@@ -47,13 +44,13 @@ export function renderMarkdown(text: string): React.ReactElement[] {
         <h2 key={index} className="text-2xl font-bold mt-6 mb-3 flex items-center gap-2">
           <div className="h-1 w-1 rounded-full bg-primary" />
           {line.replace("## ", "")}
-        </h2>
+        </h2>,
       );
     } else if (line.startsWith("### ")) {
       elements.push(
         <h3 key={index} className="text-xl font-semibold mt-5 mb-2">
           {line.replace("### ", "")}
-        </h3>
+        </h3>,
       );
     } else if (line.startsWith("# ") && !line.startsWith("#")) {
       return;
@@ -64,14 +61,14 @@ export function renderMarkdown(text: string): React.ReactElement[] {
           <div key={index} className="ml-6 mb-2 flex gap-2">
             <span className="font-semibold text-primary">{match[1]}:</span>
             <span className="text-muted-foreground">{match[2]}</span>
-          </div>
+          </div>,
         );
       }
     } else if (line.match(/^\d+\./)) {
       elements.push(
         <li key={index} className="ml-6 mb-2 text-muted-foreground">
           {line.replace(/^\d+\.\s*/, "")}
-        </li>
+        </li>,
       );
     } else if (line.startsWith("- ")) {
       const content = line.replace("- ", "");
@@ -81,13 +78,13 @@ export function renderMarkdown(text: string): React.ReactElement[] {
           <li key={index} className="ml-6 mb-2 flex gap-2">
             <span className="font-semibold text-primary">{boldMatch[1]}:</span>
             <span className="text-muted-foreground">{boldMatch[2]}</span>
-          </li>
+          </li>,
         );
       } else {
         elements.push(
           <li key={index} className="ml-6 mb-2 text-muted-foreground">
             {content}
-          </li>
+          </li>,
         );
       }
     } else if (line.startsWith("*   **")) {
@@ -97,7 +94,7 @@ export function renderMarkdown(text: string): React.ReactElement[] {
           <div key={index} className="ml-6 mb-2 flex gap-2">
             <span className="font-semibold text-primary">{match[1]}:</span>
             <span className="text-muted-foreground">{match[2]}</span>
-          </div>
+          </div>,
         );
       }
     } else if (line.startsWith("---")) {
@@ -112,7 +109,7 @@ export function renderMarkdown(text: string): React.ReactElement[] {
           key={index}
           className="mb-3 text-muted-foreground leading-relaxed"
           dangerouslySetInnerHTML={{ __html: formattedLine }}
-        />
+        />,
       );
     }
   });

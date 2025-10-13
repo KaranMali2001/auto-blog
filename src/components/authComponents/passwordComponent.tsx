@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useSignIn } from '@clerk/nextjs';
-import { motion } from 'framer-motion';
-import { AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useSignIn } from "@clerk/nextjs";
+import { motion } from "framer-motion";
+import { AlertCircle, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function PasswordComponent({ email }: { email: string }) {
   const { isLoaded, signIn, setActive } = useSignIn();
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function PasswordComponent({ email }: { email: string }) {
     if (!isLoaded) return;
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const result = await signIn.create({
@@ -29,13 +29,13 @@ export default function PasswordComponent({ email }: { email: string }) {
         password,
       });
 
-      if (result.status === 'complete') {
+      if (result.status === "complete") {
         await setActive!({ session: result.createdSessionId });
-        router.push('/dashboard');
+        router.push("/dashboard");
       }
     } catch (err) {
       //@ts-expect-error err.errors is not defined
-      setError(err.errors?.[0]?.message || 'Login failed. Please try again.');
+      setError(err.errors?.[0]?.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +70,7 @@ export default function PasswordComponent({ email }: { email: string }) {
             <div className="relative">
               <Input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -82,17 +82,13 @@ export default function PasswordComponent({ email }: { email: string }) {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? "Logging in..." : "Login"}
           </Button>
         </form>
 
@@ -112,10 +108,7 @@ export default function PasswordComponent({ email }: { email: string }) {
         )}
 
         <div className="text-center">
-          <Button
-            variant="link"
-            className="text-sm text-blue-600 hover:underline"
-          >
+          <Button variant="link" className="text-sm text-blue-600 hover:underline">
             Forgot password?
           </Button>
         </div>

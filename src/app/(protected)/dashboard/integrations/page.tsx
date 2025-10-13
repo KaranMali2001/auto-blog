@@ -151,7 +151,9 @@ export default function DashboardPage() {
           <Card className="border-border/50 bg-card">
             <CardHeader>
               <CardTitle>Ready to Create?</CardTitle>
-              <CardDescription>Your GitHub is connected and ready. Head to your dashboard to start creating blog posts.</CardDescription>
+              <CardDescription>
+                Your GitHub is connected and ready. Head to your dashboard to start creating blog posts.
+              </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-3">
               <Button asChild className="flex-1">
@@ -187,7 +189,10 @@ export default function DashboardPage() {
           <Card className="border-border/50 bg-card shadow-lg">
             <CardHeader>
               <CardTitle>GitHub Integration</CardTitle>
-              <CardDescription>Auto Blog needs access to create and manage repositories for your blog posts. You'll be able to review and configure permissions.</CardDescription>
+              <CardDescription>
+                Auto Blog needs access to create and manage repositories for your blog posts. You'll be able to review
+                and configure permissions.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button asChild className="w-full" size="lg">
@@ -196,7 +201,9 @@ export default function DashboardPage() {
                   Connect GitHub Account
                 </Link>
               </Button>
-              <p className="text-xs text-center text-muted-foreground">By connecting, you agree to grant Auto Blog the necessary permissions</p>
+              <p className="text-xs text-center text-muted-foreground">
+                By connecting, you agree to grant Auto Blog the necessary permissions
+              </p>
             </CardContent>
           </Card>
         ) : fetchError ? (

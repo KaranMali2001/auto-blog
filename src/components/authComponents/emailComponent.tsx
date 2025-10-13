@@ -1,8 +1,8 @@
-import { useSignIn } from '@clerk/nextjs';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import Link from 'next/link';
-import { OAuthStrategy } from '@clerk/types';
+import { useSignIn } from "@clerk/nextjs";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { OAuthStrategy } from "@clerk/types";
 export default function EmailComponent({
   error,
   handleEmailSubmit,
@@ -18,8 +18,8 @@ export default function EmailComponent({
   const handleGoogleSignIn = (strategy: OAuthStrategy) => {
     return signIn!.authenticateWithRedirect({
       strategy,
-      redirectUrl: '/sign-up/sso-callback',
-      redirectUrlComplete: '/dashboard',
+      redirectUrl: "/sign-up/sso-callback",
+      redirectUrlComplete: "/dashboard",
     });
   };
   return (
@@ -51,10 +51,7 @@ export default function EmailComponent({
 
         <form onSubmit={(e) => handleEmailSubmit(e)} className="space-y-6">
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email address
             </label>
             <motion.input
@@ -83,16 +80,14 @@ export default function EmailComponent({
             <div className="w-full border-t border-gray-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
-              Or continue with
-            </span>
+            <span className="px-2 bg-white text-gray-500">Or continue with</span>
           </div>
         </div>
 
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => handleGoogleSignIn('oauth_google')}
+          onClick={() => handleGoogleSignIn("oauth_google")}
           className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           <Image
@@ -105,15 +100,8 @@ export default function EmailComponent({
           Sign in with Google
         </motion.button>
 
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="w-full flex justify-center"
-        >
-          <Link
-            href="/sign-up"
-            className="text-sm font-medium text-black hover:text-blue-500"
-          >
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full flex justify-center">
+          <Link href="/sign-up" className="text-sm font-medium text-black hover:text-blue-500">
             Don&apos;t have an account? Sign Up
           </Link>
         </motion.div>

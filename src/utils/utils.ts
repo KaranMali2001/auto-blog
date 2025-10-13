@@ -1,7 +1,15 @@
 // File exclusion logic
 export function shouldExcludeFile(filename: string, file: { additions?: number; deletions?: number }): boolean {
   // 1. Exclude lock files
-  const lockFiles = ["package-lock.json", "pnpm-lock.yaml", "yarn.lock", "Gemfile.lock", "Cargo.lock", "poetry.lock", "composer.lock"];
+  const lockFiles = [
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "Gemfile.lock",
+    "Cargo.lock",
+    "poetry.lock",
+    "composer.lock",
+  ];
   if (lockFiles.includes(filename)) return true;
 
   // 2. Exclude by pattern
@@ -20,7 +28,28 @@ export function shouldExcludeFile(filename: string, file: { additions?: number; 
   if (excludePatterns.some((pattern) => pattern.test(filename))) return true;
 
   // 3. Exclude binary/asset files
-  const binaryExtensions = ["png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "woff", "woff2", "ttf", "eot", "otf", "mp4", "webm", "mp3", "wav", "pdf", "zip", "tar", "gz"];
+  const binaryExtensions = [
+    "png",
+    "jpg",
+    "jpeg",
+    "gif",
+    "svg",
+    "ico",
+    "webp",
+    "woff",
+    "woff2",
+    "ttf",
+    "eot",
+    "otf",
+    "mp4",
+    "webm",
+    "mp3",
+    "wav",
+    "pdf",
+    "zip",
+    "tar",
+    "gz",
+  ];
   const ext = filename.split(".").pop()?.toLowerCase();
   if (ext && binaryExtensions.includes(ext)) return true;
 

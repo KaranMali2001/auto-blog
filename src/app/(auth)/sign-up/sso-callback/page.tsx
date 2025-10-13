@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import LoadingSpinner from '@/components/authComponents/LoadingSpinner';
-import { AuthenticateWithRedirectCallback } from '@clerk/nextjs';
-import { motion } from 'framer-motion';
+import LoadingSpinner from "@/components/authComponents/LoadingSpinner";
+import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
+import { motion } from "framer-motion";
 
-const loadingPhrases = ['Finalizing authentication...'];
+const loadingPhrases = ["Finalizing authentication..."];
 
 export default function SSOCallback() {
   return (
@@ -17,7 +17,7 @@ export default function SSOCallback() {
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
-        transition={{ duration: 0.5, type: 'spring', stiffness: 120 }}
+        transition={{ duration: 0.5, type: "spring", stiffness: 120 }}
         className="bg-card p-8 rounded-lg shadow-lg max-w-md w-full backdrop-blur-sm bg-opacity-80"
       >
         <motion.h2

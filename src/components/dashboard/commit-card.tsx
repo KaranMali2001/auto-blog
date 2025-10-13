@@ -12,7 +12,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation } from "convex/react";
 import { Calendar, Edit, GitCommit, Loader2, RefreshCw, Trash2, User2 } from "lucide-react";
@@ -105,7 +113,12 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
           <div className="flex items-center gap-2">
             {commit.summarizedCommitDiff && !isEditing && (
               <>
-                <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="text-muted-foreground hover:text-foreground">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsEditing(true)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Dialog open={isRegenerateDialogOpen} onOpenChange={setIsRegenerateDialogOpen}>
@@ -117,7 +130,9 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Regenerate Summary</DialogTitle>
-                      <DialogDescription>Provide instructions for how you'd like the AI to regenerate this commit summary.</DialogDescription>
+                      <DialogDescription>
+                        Provide instructions for how you'd like the AI to regenerate this commit summary.
+                      </DialogDescription>
                     </DialogHeader>
                     <Textarea
                       placeholder="E.g., 'Make it more detailed', 'Focus on the performance improvements', 'Use simpler language'..."
@@ -126,7 +141,11 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
                       className="min-h-[100px]"
                     />
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsRegenerateDialogOpen(false)} disabled={isRegenerating}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsRegenerateDialogOpen(false)}
+                        disabled={isRegenerating}
+                      >
                         Cancel
                       </Button>
                       <Button onClick={handleRegenerate} disabled={!userInput.trim() || isRegenerating}>
@@ -146,11 +165,16 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete commit?</AlertDialogTitle>
-                  <AlertDialogDescription>Are you sure you want to delete this commit? This action cannot be undone.</AlertDialogDescription>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this commit? This action cannot be undone.
+                  </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => onDelete(commit._id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  <AlertDialogAction
+                    onClick={() => onDelete(commit._id)}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -172,7 +196,12 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
 
         {/* Summary */}
         {isEditing ? (
-          <RichTextEditor content={editedContent} onChange={setEditedContent} onSave={handleSave} onCancel={handleCancel} />
+          <RichTextEditor
+            content={editedContent}
+            onChange={setEditedContent}
+            onSave={handleSave}
+            onCancel={handleCancel}
+          />
         ) : commit.summarizedCommitDiff ? (
           <details className="group">
             <summary className="cursor-pointer text-sm font-medium text-primary hover:underline list-none flex items-center gap-2">

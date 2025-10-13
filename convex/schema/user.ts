@@ -2,7 +2,12 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { action, internalMutation, internalQuery } from "../_generated/server";
-import { aggregateByCommitCount, aggregateByCommitSummary, aggregateByRepoCount, aggregateByTotalBlogCount } from "../aggregation";
+import {
+  aggregateByCommitCount,
+  aggregateByCommitSummary,
+  aggregateByRepoCount,
+  aggregateByTotalBlogCount,
+} from "../aggregation";
 import { authenticatedQuery } from "../lib/auth";
 
 export const UserSchema = defineTable({
@@ -95,7 +100,12 @@ export const updateInstalltionId = internalMutation({
       for (const repo of args.repositories) {
         const currentRepo = await ctx.db
           .query("repos")
-          .filter((q) => q.and(q.eq(q.field("installationId"), args.installationId), q.eq(q.field("name"), `https://github.com/${repo}`)))
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("installationId"), args.installationId),
+              q.eq(q.field("name"), `https://github.com/${repo}`),
+            ),
+          )
           .unique();
 
         if (currentRepo) {

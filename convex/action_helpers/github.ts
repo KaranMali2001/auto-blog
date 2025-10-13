@@ -23,13 +23,18 @@ export const getCommitDiffAction = internalAction({
       if (!owner || !repo) {
         throw new Error(`Invalid github_url: ${args.github_url}`);
       }
-      const { commit, filesChanged, stats, filteredDiff } = await ctx.runAction(internal.action_helpers.github.getCommitData, {
+      const { commit, filesChanged, stats, filteredDiff } = await ctx.runAction(
+        internal.action_helpers.github.getCommitData,
+        {
+          installationId: args.installationId,
+          commitSha: args.commitSha,
+          owner,
+          repo,
+        },
+      );
+      const user = await ctx.runQuery(internal.schema.user.getUserByinstallationId, {
         installationId: args.installationId,
-        commitSha: args.commitSha,
-        owner,
-        repo,
       });
-      const user = await ctx.runQuery(internal.schema.user.getUserByinstallationId, { installationId: args.installationId });
       const repoid = await ctx.runQuery(internal.schema.repo.getRepoByInstallation, {
         installationId: args.installationId,
       });

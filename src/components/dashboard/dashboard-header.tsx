@@ -6,7 +6,7 @@ import { ThemeToggle } from "./theme-toggle";
 
 export function DashboardHeader() {
   const router = useRouter();
-  
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -15,11 +15,7 @@ export function DashboardHeader() {
           <p className="text-muted-foreground">View your repositories and commits</p>
         </div>
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            onClick={() => router.push("/blog")}
-            className="flex items-center gap-2"
-          >
+          <Button variant="outline" onClick={() => router.push("/blog")} className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             My Blogs
           </Button>

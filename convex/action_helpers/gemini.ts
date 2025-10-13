@@ -3,7 +3,11 @@ import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";
 import { MODEL, genAI } from "../config/gemini";
 import { buildLinkedInPrompt, buildTwitterPrompt } from "../config/promptHelpers";
-import { generateLinkedInPostPrompt, generateTwitterPostPrompt, regenerateSummaryWithUserInput } from "../config/prompts";
+import {
+  generateLinkedInPostPrompt,
+  generateTwitterPostPrompt,
+  regenerateSummaryWithUserInput,
+} from "../config/prompts";
 
 export const getSummary = internalAction({
   args: {
@@ -79,15 +83,17 @@ export const generateBlog = internalAction({
         commitAuthor: v.string(),
         repoName: v.string(),
         commitDate: v.string(),
-      })
+      }),
     ),
     totalGeneration: v.number(),
     platform: v.union(v.literal("linkedin"), v.literal("twitter")),
     options: v.optional(
       v.object({
-        toneType: v.optional(v.union(v.literal("technical"), v.literal("business"), v.literal("hiring manager"), v.string())),
+        toneType: v.optional(
+          v.union(v.literal("technical"), v.literal("business"), v.literal("hiring manager"), v.string()),
+        ),
         length: v.union(v.literal("short"), v.literal("medium"), v.literal("long")),
-      })
+      }),
     ),
   },
   handler: async (ctx, args) => {

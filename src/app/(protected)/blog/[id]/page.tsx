@@ -4,7 +4,14 @@ import { useQueryWithStatus } from "@/app/Providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,15 +27,15 @@ export default function BlogDetailPage() {
   const params = useParams();
   const router = useRouter();
   const blogId = params.id as Id<"blogs">;
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
-  
+
   const { data: blog, isPending, error } = useQueryWithStatus(api.schema.blog.getBlogById, { blogId });
-  const { data: commits, isPending: commitsPending } = useQueryWithStatus(api.schema.commit.getCommitsByIds, { 
-    commitIds: blog?.commitIds || [] 
+  const { data: commits, isPending: commitsPending } = useQueryWithStatus(api.schema.commit.getCommitsByIds, {
+    commitIds: blog?.commitIds || [],
   });
   const deleteBlog = useMutation(api.schema.blog.deleteBlog);
   const updateBlog = useMutation(api.schema.blog.updateBlog);
@@ -92,11 +99,7 @@ export default function BlogDetailPage() {
           <Card className="p-8">
             <div className="text-center text-muted-foreground">
               <p>Blog not found or you don't have permission to view it.</p>
-              <Button 
-                onClick={() => router.push("/blog")} 
-                variant="outline" 
-                className="mt-4"
-              >
+              <Button onClick={() => router.push("/blog")} variant="outline" className="mt-4">
                 Back to Blogs
               </Button>
             </div>
@@ -112,11 +115,7 @@ export default function BlogDetailPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => router.push("/blog")}
-            >
+            <Button variant="ghost" size="sm" onClick={() => router.push("/blog")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Blogs
             </Button>
@@ -126,22 +125,12 @@ export default function BlogDetailPage() {
               {blog.status}
             </Badge>
             {blog.status === "completed" && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleEdit}
-                className="h-8"
-              >
+              <Button variant="outline" size="sm" onClick={handleEdit} className="h-8">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
             )}
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => setShowDeleteDialog(true)}
-              className="h-8"
-            >
+            <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="h-8">
               <Trash2 className="h-4 w-4 mr-2" />
               Delete
             </Button>
@@ -171,11 +160,12 @@ export default function BlogDetailPage() {
                     <CardTitle className="text-3xl font-bold">{blog.title}</CardTitle>
                   )}
                   <CardDescription className="mt-2 text-lg">
-                    {blog.platform === "twitter" ? "Twitter/X" : "LinkedIn"} • {blog.commitIds.length} commit{blog.commitIds.length !== 1 ? "s" : ""}
+                    {blog.platform === "twitter" ? "Twitter/X" : "LinkedIn"} • {blog.commitIds.length} commit
+                    {blog.commitIds.length !== 1 ? "s" : ""}
                   </CardDescription>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -191,14 +181,8 @@ export default function BlogDetailPage() {
 
               {blog.options && (
                 <div className="flex flex-wrap gap-2 mt-4">
-                  {blog.options.toneType && (
-                    <Badge variant="outline">
-                      Tone: {blog.options.toneType}
-                    </Badge>
-                  )}
-                  <Badge variant="outline">
-                    Length: {blog.options.length}
-                  </Badge>
+                  {blog.options.toneType && <Badge variant="outline">Tone: {blog.options.toneType}</Badge>}
+                  <Badge variant="outline">Length: {blog.options.length}</Badge>
                 </div>
               )}
             </CardHeader>
@@ -217,7 +201,9 @@ export default function BlogDetailPage() {
                 <div className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                   <p className="text-lg font-medium">Generating your blog post...</p>
-                  <p className="text-muted-foreground">This may take a few moments. The page will update automatically when ready.</p>
+                  <p className="text-muted-foreground">
+                    This may take a few moments. The page will update automatically when ready.
+                  </p>
                 </div>
               ) : isEditing ? (
                 <div className="space-y-4">

@@ -23,7 +23,7 @@ export default function DashboardPage() {
   const deleteCommit = useMutation(api.schema.commit.deleteCommit);
   const updateSummary = useMutation(api.schema.commit.updateSummary);
   const router = useRouter();
-  
+
   const [selectedCommits, setSelectedCommits] = useState<Id<"commits">[]>([]);
   const [showBlogForm, setShowBlogForm] = useState(false);
 
@@ -32,35 +32,38 @@ export default function DashboardPage() {
   }
 
   // Group commits by repository URL (since commits have the URL)
-  const commitsByRepo = commits.reduce((acc, commit) => {
-    const repoUrl = commit.commitRepositoryUrl;
-    const repoName = repoUrl.split('/').slice(-2).join('/'); // Get owner/repo from URL
-    
-    if (!acc[repoUrl]) {
-      acc[repoUrl] = {
-        repo: { name: repoName, repoUrl },
-        commits: []
-      };
-    }
-    acc[repoUrl].commits.push(commit);
-    return acc;
-  }, {} as Record<string, { repo: any; commits: any[] }>);
+  const commitsByRepo = commits.reduce(
+    (acc, commit) => {
+      const repoUrl = commit.commitRepositoryUrl;
+      const repoName = repoUrl.split("/").slice(-2).join("/"); // Get owner/repo from URL
+
+      if (!acc[repoUrl]) {
+        acc[repoUrl] = {
+          repo: { name: repoName, repoUrl },
+          commits: [],
+        };
+      }
+      acc[repoUrl].commits.push(commit);
+      return acc;
+    },
+    {} as Record<string, { repo: any; commits: any[] }>,
+  );
 
   const handleCommitSelection = (commitId: Id<"commits">, checked: boolean) => {
     if (checked) {
-      setSelectedCommits(prev => [...prev, commitId]);
+      setSelectedCommits((prev) => [...prev, commitId]);
     } else {
-      setSelectedCommits(prev => prev.filter(id => id !== commitId));
+      setSelectedCommits((prev) => prev.filter((id) => id !== commitId));
     }
   };
 
   const handleSelectAll = (repoCommits: any[], checked: boolean) => {
     if (checked) {
-      const newSelections = repoCommits.map(c => c._id).filter(id => !selectedCommits.includes(id));
-      setSelectedCommits(prev => [...prev, ...newSelections]);
+      const newSelections = repoCommits.map((c) => c._id).filter((id) => !selectedCommits.includes(id));
+      setSelectedCommits((prev) => [...prev, ...newSelections]);
     } else {
-      const repoCommitIds = repoCommits.map(c => c._id);
-      setSelectedCommits(prev => prev.filter(id => !repoCommitIds.includes(id)));
+      const repoCommitIds = repoCommits.map((c) => c._id);
+      setSelectedCommits((prev) => prev.filter((id) => !repoCommitIds.includes(id)));
     }
   };
 
@@ -77,16 +80,16 @@ export default function DashboardPage() {
             </Button>
           )}
         </div>
-        
+
         {commits.length === 0 ? (
           <EmptyState />
         ) : (
           <div className="space-y-8">
             {/* Commits grouped by Repository */}
             {Object.values(commitsByRepo).map(({ repo, commits: repoCommits }) => {
-              const allSelected = repoCommits.every(c => selectedCommits.includes(c._id));
-              const someSelected = repoCommits.some(c => selectedCommits.includes(c._id));
-              
+              const allSelected = repoCommits.every((c) => selectedCommits.includes(c._id));
+              const someSelected = repoCommits.some((c) => selectedCommits.includes(c._id));
+
               return (
                 <section key={repo.repoUrl}>
                   <div className="flex items-center justify-between mb-4">
@@ -98,33 +101,44 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
                         <Checkbox
-                          id={`select-all-${repo.repoUrl.replace(/[^a-zA-Z0-9]/g, '-')}`}
+                          id={`select-all-${repo.repoUrl.replace(/[^a-zA-Z0-9]/g, "-")}`}
                           checked={allSelected}
                           ref={(el) => {
-                            if (el && 'indeterminate' in el) {
+                            if (el && "indeterminate" in el) {
                               (el as any).indeterminate = someSelected && !allSelected;
                             }
                           }}
                           onCheckedChange={(checked) => handleSelectAll(repoCommits, checked as boolean)}
                         />
-                        <label htmlFor={`select-all-${repo.repoUrl.replace(/[^a-zA-Z0-9]/g, '-')}`} className="text-sm font-medium">
+                        <label
+                          htmlFor={`select-all-${repo.repoUrl.replace(/[^a-zA-Z0-9]/g, "-")}`}
+                          className="text-sm font-medium"
+                        >
                           Select All
                         </label>
                       </div>
                       <Button variant="outline" size="sm" asChild>
-                        <a href={repo.repoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                        <a
+                          href={repo.repoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2"
+                        >
                           <ExternalLink className="h-4 w-4" />
                           View Repository
                         </a>
                       </Button>
                     </div>
                   </div>
-                  
+
                   <Card>
                     <CardContent className="p-0">
                       <div className="divide-y">
                         {repoCommits.map((commit) => (
-                          <div key={commit._id} className="flex items-start gap-4 p-6 hover:bg-muted/30 transition-colors">
+                          <div
+                            key={commit._id}
+                            className="flex items-start gap-4 p-6 hover:bg-muted/30 transition-colors"
+                          >
                             <Checkbox
                               id={`commit-${commit._id}`}
                               checked={selectedCommits.includes(commit._id)}
@@ -137,7 +151,9 @@ export default function DashboardPage() {
                                 extractTags={extractTags}
                                 renderMarkdown={renderMarkdown}
                                 onDelete={(commitId) => deleteCommit({ commitId })}
-                                onUpdateSummary={(commitId, summarizedCommitDiff) => updateSummary({ commitId, summarizedCommitDiff })}
+                                onUpdateSummary={(commitId, summarizedCommitDiff) =>
+                                  updateSummary({ commitId, summarizedCommitDiff })
+                                }
                               />
                             </div>
                           </div>
@@ -150,16 +166,16 @@ export default function DashboardPage() {
             })}
           </div>
         )}
-        
+
         {/* Blog Generation Form Modal */}
         {showBlogForm && (
           <BlogGenerationForm
             selectedCommits={selectedCommits}
-            commitData={commits.map(commit => ({
+            commitData={commits.map((commit) => ({
               id: commit._id,
               message: commit.commitMessage,
               author: commit.commitAuthor,
-              sha: commit.commitSha
+              sha: commit.commitSha,
             }))}
             onClose={() => {
               setShowBlogForm(false);

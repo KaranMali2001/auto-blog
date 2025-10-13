@@ -2,7 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,22 +35,24 @@ interface BlogGenerationFormProps {
 export function BlogGenerationForm({ selectedCommits, commitData, onClose, onSuccess }: BlogGenerationFormProps) {
   const [title, setTitle] = useState("");
   const [platform, setPlatform] = useState<"twitter" | "linkedin">("twitter");
-  const [toneType, setToneType] = useState<"technical" | "business" | "hiring manager" | "professional">("professional");
+  const [toneType, setToneType] = useState<"technical" | "business" | "hiring manager" | "professional">(
+    "professional",
+  );
   const [length, setLength] = useState<"short" | "medium" | "long">("medium");
   const [isGenerating, setIsGenerating] = useState(false);
-  
+
   const createBlog = useMutation(api.schema.blog.createBlog);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (selectedCommits.length === 0) {
       toast.error("Please select at least one commit");
       return;
     }
 
     setIsGenerating(true);
-    
+
     try {
       const options = {
         toneType: toneType,
@@ -56,7 +65,7 @@ export function BlogGenerationForm({ selectedCommits, commitData, onClose, onSuc
         platform,
         options,
       });
-      
+
       toast.success("Blog generation started! Redirecting to blog page...");
       onSuccess(blogId);
     } catch (error) {
@@ -108,7 +117,12 @@ export function BlogGenerationForm({ selectedCommits, commitData, onClose, onSuc
 
             <div>
               <Label htmlFor="tone">Tone Type</Label>
-              <Select value={toneType} onValueChange={(value: "technical" | "business" | "hiring manager" | "professional") => setToneType(value)}>
+              <Select
+                value={toneType}
+                onValueChange={(value: "technical" | "business" | "hiring manager" | "professional") =>
+                  setToneType(value)
+                }
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select tone type" />
                 </SelectTrigger>
@@ -140,13 +154,14 @@ export function BlogGenerationForm({ selectedCommits, commitData, onClose, onSuc
             <CardHeader>
               <CardTitle className="text-lg">Selected Commits</CardTitle>
               <CardDescription>
-                {selectedCommits.length} commit{selectedCommits.length !== 1 ? "s" : ""} will be used to generate your blog post
+                {selectedCommits.length} commit{selectedCommits.length !== 1 ? "s" : ""} will be used to generate your
+                blog post
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {selectedCommits.map((commitId, index) => {
-                  const commit = commitData.find(c => c.id === commitId);
+                  const commit = commitData.find((c) => c.id === commitId);
                   return (
                     <div key={commitId} className="flex items-start gap-3 text-sm">
                       <span className="w-6 text-center text-muted-foreground mt-0.5">{index + 1}.</span>
