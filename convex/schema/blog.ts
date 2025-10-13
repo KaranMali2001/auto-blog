@@ -140,6 +140,7 @@ export const deleteBlog = authenticatedMutation({
     if (!blog || blog.userId !== ctx.user._id) {
       throw new Error("Blog not found or unauthorized");
     }
+    await aggregateByTotalBlogCount.delete(ctx, blog);
     await ctx.db.delete(args.blogId);
   },
 });

@@ -33,14 +33,28 @@ export const githubWebhook = httpAction(async (ctx, req) => {
 
       return new Response("ok", { status: 200 });
     }
-    if (event === "installation") {
-      if (payload.action === "deleted" || payload.action === "updated") {
+
+    if (event === "installation_repositories") {
+      // Handle added repositories
+      if (payload.action === "added" && payload.repositories_added && payload.repositories_added.length > 0) {
         const res = await ctx.runMutation(internal.schema.user.updateInstalltionId, {
-          action: payload.action,
+          action: "added",
           installationId: payload.installation.id,
-          repositories: payload.repositories.map((r) => r.full_name),
+          repositories: payload.repositories_added.map((r) => r.full_name),
         });
-        if (res == false) {
+        if (res === false) {
+          return new Response("User not found", { status: 400 });
+        }
+      }
+
+      // Handle removed repositories
+      if (payload.action === "removed" && payload.repositories_removed && payload.repositories_removed.length > 0) {
+        const res = await ctx.runMutation(internal.schema.user.updateInstalltionId, {
+          action: "removed",
+          installationId: payload.installation.id,
+          repositories: payload.repositories_removed.map((r) => r.full_name),
+        });
+        if (res === false) {
           return new Response("User not found", { status: 400 });
         }
       }

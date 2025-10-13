@@ -2,7 +2,7 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
-import { aggregateByCommitCount } from "../aggregation";
+import { aggregateByCommitCount, aggregateByCommitSummary } from "../aggregation";
 import { authenticatedMutation, authenticatedQuery } from "../lib/auth";
 
 export const commitSchema = defineTable({
@@ -33,16 +33,31 @@ export const createCommit = internalMutation({
       throw new Error("Failed to retrieve newly created commit");
     }
     await aggregateByCommitCount.insert(ctx, commit);
+    await aggregateByCommitSummary.insert(ctx, commit);
     return commit;
   },
 });
 export const updateCommit = internalMutation({
   args: { summarizedCommitDiff: v.string(), commitId: v.id("commits") },
   handler: async (ctx, args) => {
-    const commit = ctx.db.patch(args.commitId, {
+    const oldCommit = await ctx.db.get(args.commitId);
+    if (!oldCommit) {
+      throw new Error("Commit not found");
+    }
+
+    await ctx.db.patch(args.commitId, {
       summarizedCommitDiff: args.summarizedCommitDiff,
     });
-    return commit;
+
+    const updatedCommit = await ctx.db.get(args.commitId);
+    if (!updatedCommit) {
+      throw new Error("Failed to retrieve updated commit");
+    }
+
+    // Update the aggregate when summary changes from empty to filled
+    await aggregateByCommitSummary.replace(ctx, oldCommit, updatedCommit);
+
+    return updatedCommit;
   },
 });
 export const getCommits = authenticatedQuery({
@@ -64,19 +79,29 @@ export const deleteCommit = authenticatedMutation({
       throw new Error("Unauthorized");
     }
     await aggregateByCommitCount.delete(ctx, commit);
+    await aggregateByCommitSummary.delete(ctx, commit);
     await ctx.db.delete(args.commitId);
   },
 });
 export const updateSummary = authenticatedMutation({
   args: { commitId: v.id("commits"), summarizedCommitDiff: v.string() },
   handler: async (ctx, args) => {
-    const commit = await ctx.db.get(args.commitId);
-    if (!commit || commit.userId !== ctx.user._id) {
+    const oldCommit = await ctx.db.get(args.commitId);
+    if (!oldCommit || oldCommit.userId !== ctx.user._id) {
       throw new Error("Unauthorized");
     }
+
     await ctx.db.patch(args.commitId, {
       summarizedCommitDiff: args.summarizedCommitDiff,
     });
+
+    const updatedCommit = await ctx.db.get(args.commitId);
+    if (!updatedCommit) {
+      throw new Error("Failed to retrieve updated commit");
+    }
+
+    // Update the aggregate when summary changes
+    await aggregateByCommitSummary.replace(ctx, oldCommit, updatedCommit);
   },
 });
 export const regenerateSummary = authenticatedMutation({

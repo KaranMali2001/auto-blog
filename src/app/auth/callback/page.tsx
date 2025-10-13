@@ -19,6 +19,11 @@ export function CallbackComponent() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (setup_action === "update") {
+      toast.error("Installation updated. Redirecting to Dashboard...");
+      setTimeout(() => router.push("/dashboard"), 2000);
+      return;
+    }
     if (!installation_id) return;
 
     setLoading(true);

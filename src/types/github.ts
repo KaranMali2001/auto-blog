@@ -22,9 +22,10 @@ export interface GitHubInstallation {
 }
 
 export interface GitHubWebhookPayload {
-  action: "updated" | "deleted";
+  action?: "added" | "removed";
   installation: GitHubInstallation;
-  repository: GitHubRepository;
-  commits: GitHubCommit[];
-  repositories: GithubRepoForInstallation[];
+  repository?: GitHubRepository;
+  commits?: GitHubCommit[];
+  repositories_added?: GithubRepoForInstallation[];
+  repositories_removed?: GithubRepoForInstallation[];
 }

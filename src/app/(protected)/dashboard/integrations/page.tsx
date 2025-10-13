@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const [fetchError, setFetchError] = useState<string>("");
 
   useEffect(() => {
-    if (!user || user.installationId) return;
+    if (!user) return;
 
     const fetchAuthUrl = async () => {
       try {
@@ -159,6 +159,14 @@ export default function DashboardPage() {
               <Button asChild className="flex-1">
                 <Link href="/dashboard">Go to Dashboard</Link>
               </Button>
+              {authUrl && (
+                <Button asChild variant="outline" className="flex-1">
+                  <Link href={authUrl} className="flex items-center justify-center gap-2">
+                    <Github className="h-4 w-4" />
+                    Update Integration
+                  </Link>
+                </Button>
+              )}
               <SignOutButton>
                 <Button variant="outline" className="flex-1">
                   Sign Out

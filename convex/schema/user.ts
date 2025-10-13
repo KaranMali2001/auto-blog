@@ -91,31 +91,32 @@ export const getCurrentUser = authenticatedQuery({
 });
 export const updateInstalltionId = internalMutation({
   args: {
-    action: v.union(v.literal("deleted"), v.literal("updated")),
+    action: v.union(v.literal("removed"), v.literal("added")),
     installationId: v.number(),
     repositories: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    if (args.action === "deleted") {
+    if (args.action === "removed") {
       for (const repo of args.repositories) {
         const currentRepo = await ctx.db
           .query("repos")
           .filter((q) =>
             q.and(
               q.eq(q.field("installationId"), args.installationId),
-              q.eq(q.field("name"), `https://github.com/${repo}`),
+              q.eq(q.field("repoUrl"), `https://github.com/${repo}`),
             ),
           )
           .unique();
 
         if (currentRepo) {
+          await aggregateByRepoCount.delete(ctx, currentRepo);
           await ctx.db.delete(currentRepo._id);
         }
       }
 
       return true;
     }
-    if (args.action === "updated") {
+    if (args.action === "added") {
       const user = await ctx.db
         .query("users")
         .filter((q) => q.eq(q.field("installationId"), args.installationId))
@@ -123,14 +124,18 @@ export const updateInstalltionId = internalMutation({
       if (!user) {
         return false;
       }
-      args.repositories.map((r) => {
-        ctx.db.insert("repos", {
+      for (const r of args.repositories) {
+        const repoId = await ctx.db.insert("repos", {
           name: r,
           repoUrl: `https://github.com/${r}`,
           installationId: args.installationId,
           userId: user._id,
         });
-      });
+        const repo = await ctx.db.get(repoId);
+        if (repo) {
+          await aggregateByRepoCount.insert(ctx, repo);
+        }
+      }
       return true;
     }
     return false;
