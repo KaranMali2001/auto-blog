@@ -8,7 +8,7 @@ import {
   aggregateByRepoCount,
   aggregateByTotalBlogCount,
 } from "../aggregation";
-import { authenticatedQuery } from "../lib/auth";
+import { authenticatedMutation, authenticatedQuery } from "../lib/auth";
 
 export const UserSchema = defineTable({
   clerkId: v.string(),
@@ -171,5 +171,16 @@ export const getUserIntegrationStats = authenticatedQuery({
       summaryCount,
       blogCount,
     };
+  },
+});
+export const updateUser = authenticatedMutation({
+  args: {
+    name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { name } = args;
+    await ctx.db.patch(ctx.user._id, {
+      name,
+    });
   },
 });

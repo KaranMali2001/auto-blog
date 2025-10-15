@@ -291,3 +291,26 @@ body {
   background: var(--primary) !important;
   color: var(--primary-foreground) !important;
 }
+
+/* Compact Sidebar Hover Expansion */
+.group\/compact-sidebar[data-state="collapsed"]:hover [data-sidebar="sidebar-container"] {
+  width: 16rem !important;
+  transition: width 200ms ease-in-out;
+}
+
+.group\/compact-sidebar[data-state="collapsed"] [data-sidebar="sidebar-container"] {
+  transition: width 200ms ease-in-out;
+}
+
+/* Hide text in compact mode, show on hover */
+.group\/compact-sidebar[data-state="collapsed"] [data-sidebar="group-label"],
+.group\/compact-sidebar[data-state="collapsed"] .sidebar-text {
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+}
+
+.group\/compact-sidebar[data-state="collapsed"]:hover [data-sidebar="group-label"],
+.group\/compact-sidebar[data-state="collapsed"]:hover .sidebar-text {
+  opacity: 1;
+  transition: opacity 200ms ease-in-out 100ms;
+}

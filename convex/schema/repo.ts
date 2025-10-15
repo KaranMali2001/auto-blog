@@ -39,11 +39,13 @@ export const getRepos = authenticatedQuery({
 export const getRepoByInstallation = internalQuery({
   args: {
     installationId: v.number(),
+    repoUrl: v.string(),
   },
   handler: async (ctx, args) => {
     return ctx.db
       .query("repos")
       .filter((q) => q.eq(q.field("installationId"), args.installationId))
+      .filter((q) => q.eq(q.field("repoUrl"), args.repoUrl))
       .unique();
   },
 });

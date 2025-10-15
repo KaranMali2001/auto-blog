@@ -27,7 +27,11 @@ import type * as schema_user from "../schema/user.js";
 import type * as schema_webhook from "../schema/webhook.js";
 import type * as scripts_backfillAggregation from "../scripts/backfillAggregation.js";
 
-import type { ApiFromModules, FilterApi, FunctionReference } from "convex/server";
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -59,8 +63,14 @@ declare const fullApi: ApiFromModules<{
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
-export declare const api: FilterApi<typeof fullApiWithMounts, FunctionReference<any, "public">>;
-export declare const internal: FilterApi<typeof fullApiWithMounts, FunctionReference<any, "internal">>;
+export declare const api: FilterApi<
+  typeof fullApiWithMounts,
+  FunctionReference<any, "public">
+>;
+export declare const internal: FilterApi<
+  typeof fullApiWithMounts,
+  FunctionReference<any, "internal">
+>;
 
 export declare const components: {
   aggregate: {
@@ -102,9 +112,24 @@ export declare const components: {
         },
         Array<{ k: any; s: number; v: any }>
       >;
-      get: FunctionReference<"query", "internal", { key: any; namespace?: any }, null | { k: any; s: number; v: any }>;
-      offset: FunctionReference<"query", "internal", { k1?: any; key: any; namespace?: any }, number>;
-      offsetUntil: FunctionReference<"query", "internal", { k2?: any; key: any; namespace?: any }, number>;
+      get: FunctionReference<
+        "query",
+        "internal",
+        { key: any; namespace?: any },
+        null | { k: any; s: number; v: any }
+      >;
+      offset: FunctionReference<
+        "query",
+        "internal",
+        { k1?: any; key: any; namespace?: any },
+        number
+      >;
+      offsetUntil: FunctionReference<
+        "query",
+        "internal",
+        { k2?: any; key: any; namespace?: any },
+        number
+      >;
       paginate: FunctionReference<
         "query",
         "internal",
@@ -128,12 +153,22 @@ export declare const components: {
         { cursor?: string; limit: number },
         { cursor: string; isDone: boolean; page: Array<any> }
       >;
-      validate: FunctionReference<"query", "internal", { namespace?: any }, any>;
+      validate: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any },
+        any
+      >;
     };
     inspect: {
       display: FunctionReference<"query", "internal", { namespace?: any }, any>;
       dump: FunctionReference<"query", "internal", { namespace?: any }, string>;
-      inspectNode: FunctionReference<"query", "internal", { namespace?: any; node?: string }, null>;
+      inspectNode: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any; node?: string },
+        null
+      >;
       listTreeNodes: FunctionReference<
         "query",
         "internal",
@@ -166,8 +201,18 @@ export declare const components: {
         { maxNodeSize?: number; namespace?: any; rootLazy?: boolean },
         null
       >;
-      deleteIfExists: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, any>;
-      delete_: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, null>;
+      deleteIfExists: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        any
+      >;
+      delete_: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        null
+      >;
       init: FunctionReference<
         "mutation",
         "internal",
@@ -180,7 +225,12 @@ export declare const components: {
         { key: any; namespace?: any; summand?: number; value: any },
         null
       >;
-      makeRootLazy: FunctionReference<"mutation", "internal", { namespace?: any }, null>;
+      makeRootLazy: FunctionReference<
+        "mutation",
+        "internal",
+        { namespace?: any },
+        null
+      >;
       replace: FunctionReference<
         "mutation",
         "internal",
@@ -248,9 +298,24 @@ export declare const components: {
         },
         Array<{ k: any; s: number; v: any }>
       >;
-      get: FunctionReference<"query", "internal", { key: any; namespace?: any }, null | { k: any; s: number; v: any }>;
-      offset: FunctionReference<"query", "internal", { k1?: any; key: any; namespace?: any }, number>;
-      offsetUntil: FunctionReference<"query", "internal", { k2?: any; key: any; namespace?: any }, number>;
+      get: FunctionReference<
+        "query",
+        "internal",
+        { key: any; namespace?: any },
+        null | { k: any; s: number; v: any }
+      >;
+      offset: FunctionReference<
+        "query",
+        "internal",
+        { k1?: any; key: any; namespace?: any },
+        number
+      >;
+      offsetUntil: FunctionReference<
+        "query",
+        "internal",
+        { k2?: any; key: any; namespace?: any },
+        number
+      >;
       paginate: FunctionReference<
         "query",
         "internal",
@@ -274,12 +339,22 @@ export declare const components: {
         { cursor?: string; limit: number },
         { cursor: string; isDone: boolean; page: Array<any> }
       >;
-      validate: FunctionReference<"query", "internal", { namespace?: any }, any>;
+      validate: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any },
+        any
+      >;
     };
     inspect: {
       display: FunctionReference<"query", "internal", { namespace?: any }, any>;
       dump: FunctionReference<"query", "internal", { namespace?: any }, string>;
-      inspectNode: FunctionReference<"query", "internal", { namespace?: any; node?: string }, null>;
+      inspectNode: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any; node?: string },
+        null
+      >;
       listTreeNodes: FunctionReference<
         "query",
         "internal",
@@ -312,8 +387,18 @@ export declare const components: {
         { maxNodeSize?: number; namespace?: any; rootLazy?: boolean },
         null
       >;
-      deleteIfExists: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, any>;
-      delete_: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, null>;
+      deleteIfExists: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        any
+      >;
+      delete_: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        null
+      >;
       init: FunctionReference<
         "mutation",
         "internal",
@@ -326,7 +411,12 @@ export declare const components: {
         { key: any; namespace?: any; summand?: number; value: any },
         null
       >;
-      makeRootLazy: FunctionReference<"mutation", "internal", { namespace?: any }, null>;
+      makeRootLazy: FunctionReference<
+        "mutation",
+        "internal",
+        { namespace?: any },
+        null
+      >;
       replace: FunctionReference<
         "mutation",
         "internal",
@@ -394,9 +484,24 @@ export declare const components: {
         },
         Array<{ k: any; s: number; v: any }>
       >;
-      get: FunctionReference<"query", "internal", { key: any; namespace?: any }, null | { k: any; s: number; v: any }>;
-      offset: FunctionReference<"query", "internal", { k1?: any; key: any; namespace?: any }, number>;
-      offsetUntil: FunctionReference<"query", "internal", { k2?: any; key: any; namespace?: any }, number>;
+      get: FunctionReference<
+        "query",
+        "internal",
+        { key: any; namespace?: any },
+        null | { k: any; s: number; v: any }
+      >;
+      offset: FunctionReference<
+        "query",
+        "internal",
+        { k1?: any; key: any; namespace?: any },
+        number
+      >;
+      offsetUntil: FunctionReference<
+        "query",
+        "internal",
+        { k2?: any; key: any; namespace?: any },
+        number
+      >;
       paginate: FunctionReference<
         "query",
         "internal",
@@ -420,12 +525,22 @@ export declare const components: {
         { cursor?: string; limit: number },
         { cursor: string; isDone: boolean; page: Array<any> }
       >;
-      validate: FunctionReference<"query", "internal", { namespace?: any }, any>;
+      validate: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any },
+        any
+      >;
     };
     inspect: {
       display: FunctionReference<"query", "internal", { namespace?: any }, any>;
       dump: FunctionReference<"query", "internal", { namespace?: any }, string>;
-      inspectNode: FunctionReference<"query", "internal", { namespace?: any; node?: string }, null>;
+      inspectNode: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any; node?: string },
+        null
+      >;
       listTreeNodes: FunctionReference<
         "query",
         "internal",
@@ -458,8 +573,18 @@ export declare const components: {
         { maxNodeSize?: number; namespace?: any; rootLazy?: boolean },
         null
       >;
-      deleteIfExists: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, any>;
-      delete_: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, null>;
+      deleteIfExists: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        any
+      >;
+      delete_: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        null
+      >;
       init: FunctionReference<
         "mutation",
         "internal",
@@ -472,7 +597,12 @@ export declare const components: {
         { key: any; namespace?: any; summand?: number; value: any },
         null
       >;
-      makeRootLazy: FunctionReference<"mutation", "internal", { namespace?: any }, null>;
+      makeRootLazy: FunctionReference<
+        "mutation",
+        "internal",
+        { namespace?: any },
+        null
+      >;
       replace: FunctionReference<
         "mutation",
         "internal",
@@ -540,9 +670,24 @@ export declare const components: {
         },
         Array<{ k: any; s: number; v: any }>
       >;
-      get: FunctionReference<"query", "internal", { key: any; namespace?: any }, null | { k: any; s: number; v: any }>;
-      offset: FunctionReference<"query", "internal", { k1?: any; key: any; namespace?: any }, number>;
-      offsetUntil: FunctionReference<"query", "internal", { k2?: any; key: any; namespace?: any }, number>;
+      get: FunctionReference<
+        "query",
+        "internal",
+        { key: any; namespace?: any },
+        null | { k: any; s: number; v: any }
+      >;
+      offset: FunctionReference<
+        "query",
+        "internal",
+        { k1?: any; key: any; namespace?: any },
+        number
+      >;
+      offsetUntil: FunctionReference<
+        "query",
+        "internal",
+        { k2?: any; key: any; namespace?: any },
+        number
+      >;
       paginate: FunctionReference<
         "query",
         "internal",
@@ -566,12 +711,22 @@ export declare const components: {
         { cursor?: string; limit: number },
         { cursor: string; isDone: boolean; page: Array<any> }
       >;
-      validate: FunctionReference<"query", "internal", { namespace?: any }, any>;
+      validate: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any },
+        any
+      >;
     };
     inspect: {
       display: FunctionReference<"query", "internal", { namespace?: any }, any>;
       dump: FunctionReference<"query", "internal", { namespace?: any }, string>;
-      inspectNode: FunctionReference<"query", "internal", { namespace?: any; node?: string }, null>;
+      inspectNode: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any; node?: string },
+        null
+      >;
       listTreeNodes: FunctionReference<
         "query",
         "internal",
@@ -604,8 +759,18 @@ export declare const components: {
         { maxNodeSize?: number; namespace?: any; rootLazy?: boolean },
         null
       >;
-      deleteIfExists: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, any>;
-      delete_: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, null>;
+      deleteIfExists: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        any
+      >;
+      delete_: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        null
+      >;
       init: FunctionReference<
         "mutation",
         "internal",
@@ -618,7 +783,12 @@ export declare const components: {
         { key: any; namespace?: any; summand?: number; value: any },
         null
       >;
-      makeRootLazy: FunctionReference<"mutation", "internal", { namespace?: any }, null>;
+      makeRootLazy: FunctionReference<
+        "mutation",
+        "internal",
+        { namespace?: any },
+        null
+      >;
       replace: FunctionReference<
         "mutation",
         "internal",
@@ -686,9 +856,24 @@ export declare const components: {
         },
         Array<{ k: any; s: number; v: any }>
       >;
-      get: FunctionReference<"query", "internal", { key: any; namespace?: any }, null | { k: any; s: number; v: any }>;
-      offset: FunctionReference<"query", "internal", { k1?: any; key: any; namespace?: any }, number>;
-      offsetUntil: FunctionReference<"query", "internal", { k2?: any; key: any; namespace?: any }, number>;
+      get: FunctionReference<
+        "query",
+        "internal",
+        { key: any; namespace?: any },
+        null | { k: any; s: number; v: any }
+      >;
+      offset: FunctionReference<
+        "query",
+        "internal",
+        { k1?: any; key: any; namespace?: any },
+        number
+      >;
+      offsetUntil: FunctionReference<
+        "query",
+        "internal",
+        { k2?: any; key: any; namespace?: any },
+        number
+      >;
       paginate: FunctionReference<
         "query",
         "internal",
@@ -712,12 +897,22 @@ export declare const components: {
         { cursor?: string; limit: number },
         { cursor: string; isDone: boolean; page: Array<any> }
       >;
-      validate: FunctionReference<"query", "internal", { namespace?: any }, any>;
+      validate: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any },
+        any
+      >;
     };
     inspect: {
       display: FunctionReference<"query", "internal", { namespace?: any }, any>;
       dump: FunctionReference<"query", "internal", { namespace?: any }, string>;
-      inspectNode: FunctionReference<"query", "internal", { namespace?: any; node?: string }, null>;
+      inspectNode: FunctionReference<
+        "query",
+        "internal",
+        { namespace?: any; node?: string },
+        null
+      >;
       listTreeNodes: FunctionReference<
         "query",
         "internal",
@@ -750,8 +945,18 @@ export declare const components: {
         { maxNodeSize?: number; namespace?: any; rootLazy?: boolean },
         null
       >;
-      deleteIfExists: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, any>;
-      delete_: FunctionReference<"mutation", "internal", { key: any; namespace?: any }, null>;
+      deleteIfExists: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        any
+      >;
+      delete_: FunctionReference<
+        "mutation",
+        "internal",
+        { key: any; namespace?: any },
+        null
+      >;
       init: FunctionReference<
         "mutation",
         "internal",
@@ -764,7 +969,12 @@ export declare const components: {
         { key: any; namespace?: any; summand?: number; value: any },
         null
       >;
-      makeRootLazy: FunctionReference<"mutation", "internal", { namespace?: any }, null>;
+      makeRootLazy: FunctionReference<
+        "mutation",
+        "internal",
+        { namespace?: any },
+        null
+      >;
       replace: FunctionReference<
         "mutation",
         "internal",

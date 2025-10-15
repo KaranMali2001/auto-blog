@@ -37,6 +37,7 @@ export const getCommitDiffAction = internalAction({
       });
       const repoid = await ctx.runQuery(internal.schema.repo.getRepoByInstallation, {
         installationId: args.installationId,
+        repoUrl: args.github_url,
       });
       if (!repoid) {
         throw new Error("Repo not found");
