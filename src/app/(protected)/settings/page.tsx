@@ -2,6 +2,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
 
+import { CronSettings } from "@/components/settings/cron-settings";
 import { GithubIntegration } from "@/components/settings/github-integration";
 import Settings from "@/components/settings/settings";
 import { api } from "../../../../convex/_generated/api";
@@ -13,6 +14,8 @@ export default async function SettingsPage() {
 
   const userData = await fetchQuery(api.schema.user.getCurrentUser, {}, { token });
   const stats = await fetchQuery(api.schema.user.getUserIntegrationStats, {}, { token });
+  const crons = await fetchQuery(api.schema.user_cron.getUserCronsWithHistory, {}, { token });
+  const repos = await fetchQuery(api.schema.repo.getRepos, {}, { token });
 
   if (!userData) {
     return <div className="flex items-center justify-center min-h-screen">Loading settings...</div>;
@@ -25,7 +28,7 @@ export default async function SettingsPage() {
   };
 
   return (
-    <>
+    <div className="space-y-6">
       <Settings
         userData={{
           name: userData.name || "",
@@ -34,7 +37,8 @@ export default async function SettingsPage() {
         }}
         userStats={userStats}
       />
+      <CronSettings />
       <GithubIntegration userData={userData} />
-    </>
+    </div>
   );
 }

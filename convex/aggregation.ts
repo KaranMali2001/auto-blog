@@ -41,3 +41,12 @@ export const aggregateByTotalBlogCount = new TableAggregate<{
   namespace: (d: Doc<"blogs">) => d.userId,
   sortKey: (d: Doc<"blogs">) => d._creationTime,
 });
+export const aggregateByUserCron = new TableAggregate<{
+  DataModel: DataModel;
+  TableName: "userCrons";
+  Namespace: Id<"users">;
+  Key: number;
+}>(components.userCronAggregate, {
+  namespace: (d: Doc<"userCrons">) => d.userId,
+  sortKey: (d: Doc<"userCrons">) => d._creationTime,
+});
