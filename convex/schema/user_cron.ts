@@ -25,6 +25,49 @@ function validateCronExpression(cronExpression: string): void {
     }
   }
 }
+
+// Convert Indian time to UTC for cron scheduling
+function convertIndianTimeToUTC(hour: number, minute: number): string {
+  // IST is UTC+5:30, so we subtract 5 hours and 30 minutes
+  let utcHour = hour - 5;
+  let utcMinute = minute - 30;
+
+  // Handle minute overflow
+  if (utcMinute < 0) {
+    utcMinute += 60;
+    utcHour -= 1;
+  }
+
+  // Handle hour overflow (previous day)
+  if (utcHour < 0) {
+    utcHour += 24;
+  }
+
+  // Handle hour overflow (next day)
+  if (utcHour >= 24) {
+    utcHour -= 24;
+  }
+
+  return `${utcMinute} ${utcHour} * * *`;
+}
+
+// Parse cron expression to extract hour and minute
+function parseCronExpression(cronExpression: string): { hour: number; minute: number } {
+  const parts = cronExpression.trim().split(/\s+/);
+  if (parts.length !== 5) {
+    throw new Error("Invalid cron expression format");
+  }
+
+  const minute = parseInt(parts[0]);
+  const hour = parseInt(parts[1]);
+
+  if (isNaN(minute) || isNaN(hour)) {
+    throw new Error("Invalid hour or minute in cron expression");
+  }
+
+  return { hour, minute };
+}
+
 export const userCronSchema = defineTable({
   userId: v.id("users"),
   cronExpression: v.string(),
@@ -44,17 +87,25 @@ export const createUserCron = authenticatedMutation({
     // Validate cron expression
     validateCronExpression(args.cronExpression);
 
-    // First create the database entry
+    // Parse the cron expression to get hour and minute
+    const { hour, minute } = parseCronExpression(args.cronExpression);
+
+    // Convert Indian time to UTC
+    const utcCronExpression = convertIndianTimeToUTC(hour, minute);
+
+    console.log(`Converting Indian time ${hour}:${minute.toString().padStart(2, "0")} to UTC cron: ${utcCronExpression}`);
+
+    // First create the database entry with original Indian time expression
     const userCronId = await ctx.db.insert("userCrons", {
       userId: ctx.user._id,
-      cronExpression: args.cronExpression,
+      cronExpression: args.cronExpression, // Store original Indian time
       status: "enabled",
       selectedRepos: args.selectedRepos,
     });
 
-    // Register the cron job
-    const jobId = await crons.register(ctx, { kind: "cron", cronspec: args.cronExpression }, internal.schema.cron_history.executeCronJob, { userCronId });
-
+    console.log("registering cron job", utcCronExpression, userCronId);
+    const jobId = await crons.register(ctx, { kind: "cron", cronspec: utcCronExpression }, internal.schema.cron_history.executeCronJob, { userCronId }, `cron_${userCronId}`);
+    console.log("registered cron job", jobId);
     // Update with jobId
     await ctx.db.patch(userCronId, { jobId });
 
@@ -87,9 +138,16 @@ export const updateUserCronStatus = authenticatedMutation({
       validateCronExpression(args.cronExpression);
     }
 
+    // Convert Indian time to UTC for cron scheduling
+    let utcCronExpression = args.cronExpression;
+    if (args.status === "enabled") {
+      const { hour, minute } = parseCronExpression(args.cronExpression);
+      utcCronExpression = convertIndianTimeToUTC(hour, minute);
+      console.log(`Converting Indian time ${hour}:${minute.toString().padStart(2, "0")} to UTC cron: ${utcCronExpression}`);
+    }
+
     // Handle status transitions
     if (oldUserCron.status === "enabled" && args.status === "disabled") {
-      // Disabling: delete the cron job
       if (oldUserCron.jobId) {
         await crons.delete(ctx, { id: oldUserCron.jobId });
       }
@@ -100,8 +158,8 @@ export const updateUserCronStatus = authenticatedMutation({
         jobId: undefined,
       });
     } else if (oldUserCron.status === "disabled" && args.status === "enabled") {
-      // Enabling: register new cron job
-      const jobId = await crons.register(ctx, { kind: "cron", cronspec: args.cronExpression }, internal.schema.cron_history.executeCronJob, { userCronId: args.userCronId });
+      // Enabling: register new cron job with UTC time
+      const jobId = await crons.register(ctx, { kind: "cron", cronspec: utcCronExpression }, internal.schema.cron_history.executeCronJob, { userCronId: args.userCronId }, `cron_${args.userCronId}`);
       await ctx.db.patch(args.userCronId, {
         selectedRepos: args.selectedRepos,
         cronExpression: args.cronExpression,
@@ -109,11 +167,11 @@ export const updateUserCronStatus = authenticatedMutation({
         jobId,
       });
     } else if (oldUserCron.status === "enabled" && args.status === "enabled") {
-      // Updating while enabled: delete old, create new
+      // Updating while enabled: delete old, create new with UTC time
       if (oldUserCron.jobId) {
         await crons.delete(ctx, { id: oldUserCron.jobId });
       }
-      const jobId = await crons.register(ctx, { kind: "cron", cronspec: args.cronExpression }, internal.schema.cron_history.executeCronJob, { userCronId: args.userCronId });
+      const jobId = await crons.register(ctx, { kind: "cron", cronspec: utcCronExpression }, internal.schema.cron_history.executeCronJob, { userCronId: args.userCronId }, `cron_${args.userCronId}`);
       await ctx.db.patch(args.userCronId, {
         selectedRepos: args.selectedRepos,
         cronExpression: args.cronExpression,
@@ -121,7 +179,6 @@ export const updateUserCronStatus = authenticatedMutation({
         jobId,
       });
     } else {
-      // Disabled -> Disabled: just update the fields
       await ctx.db.patch(args.userCronId, {
         selectedRepos: args.selectedRepos,
         cronExpression: args.cronExpression,

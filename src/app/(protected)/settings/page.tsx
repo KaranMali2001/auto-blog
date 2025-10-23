@@ -14,7 +14,6 @@ export default async function SettingsPage() {
 
   const userData = await fetchQuery(api.schema.user.getCurrentUser, {}, { token });
   const stats = await fetchQuery(api.schema.user.getUserIntegrationStats, {}, { token });
-  const crons = await fetchQuery(api.schema.user_cron.getUserCronsWithHistory, {}, { token });
   const repos = await fetchQuery(api.schema.repo.getRepos, {}, { token });
 
   if (!userData) {
@@ -37,7 +36,7 @@ export default async function SettingsPage() {
         }}
         userStats={userStats}
       />
-      <CronSettings />
+      <CronSettings repos={repos} />
       <GithubIntegration userData={userData} />
     </div>
   );

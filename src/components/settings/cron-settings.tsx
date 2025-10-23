@@ -24,8 +24,15 @@ import React from "react";
 import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-
-export function CronSettings() {
+interface Repos {
+  _id: Id<"repos">;
+  _creationTime: number;
+  name: string;
+  installationId: number;
+  userId: Id<"users">;
+  repoUrl: string;
+}
+export function CronSettings({ repos }: { repos: Repos[] }) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
   const [scheduleType, setScheduleType] = React.useState<"preset" | "custom">("preset");
   const [presetCron, setPresetCron] = React.useState("0 9 * * *");
@@ -40,7 +47,6 @@ export function CronSettings() {
 
   // Queries - Real-time updates
   const cronData = useQuery(api.schema.user_cron.getUserCronsWithHistory);
-  const repos = useQuery(api.schema.repo.getRepos);
 
   // Mutations
   const createCron = useMutation(api.schema.user_cron.createUserCron);
@@ -56,6 +62,27 @@ export function CronSettings() {
       // Every X days
       return `${minute} ${hour} */${dayInterval} * *`;
     }
+  };
+
+  // Convert Indian time to UTC for display
+  const convertToUTC = (hour: number, minute: number) => {
+    let utcHour = hour - 5;
+    let utcMinute = minute - 30;
+
+    if (utcMinute < 0) {
+      utcMinute += 60;
+      utcHour -= 1;
+    }
+
+    if (utcHour < 0) {
+      utcHour += 24;
+    }
+
+    if (utcHour >= 24) {
+      utcHour -= 24;
+    }
+
+    return `${utcHour.toString().padStart(2, "0")}:${utcMinute.toString().padStart(2, "0")}`;
   };
 
   React.useEffect(() => {
@@ -118,7 +145,6 @@ export function CronSettings() {
       toast.error(error.message || "Failed to delete cron job");
     }
   };
-
 
   const formatCronDescription = (expression: string): string => {
     const [minute, hour, day, month, weekday] = expression.split(" ");
@@ -232,17 +258,21 @@ export function CronSettings() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="0 9 * * *">Every day at 09:00</SelectItem>
-                        <SelectItem value="0 0 * * *">Every day at 00:00</SelectItem>
-                        <SelectItem value="0 12 * * *">Every day at 12:00</SelectItem>
-                        <SelectItem value="0 18 * * *">Every day at 18:00</SelectItem>
-                        <SelectItem value="0 9 */2 * *">Every 2 days at 09:00</SelectItem>
-                        <SelectItem value="0 9 */3 * *">Every 3 days at 09:00</SelectItem>
-                        <SelectItem value="0 9 */7 * *">Every 7 days at 09:00</SelectItem>
-                        <SelectItem value="0 0 * * 0">Weekly on Sunday at 00:00</SelectItem>
-                        <SelectItem value="0 0 1 * *">Monthly on 1st at 00:00</SelectItem>
+                        <SelectItem value="0 9 * * *">Every day at 09:00 IST (03:30 UTC)</SelectItem>
+                        <SelectItem value="0 0 * * *">Every day at 00:00 IST (18:30 UTC prev day)</SelectItem>
+                        <SelectItem value="0 12 * * *">Every day at 12:00 IST (06:30 UTC)</SelectItem>
+                        <SelectItem value="0 18 * * *">Every day at 18:00 IST (12:30 UTC)</SelectItem>
+                        <SelectItem value="0 9 */2 * *">Every 2 days at 09:00 IST (03:30 UTC)</SelectItem>
+                        <SelectItem value="0 9 */3 * *">Every 3 days at 09:00 IST (03:30 UTC)</SelectItem>
+                        <SelectItem value="0 9 */7 * *">Every 7 days at 09:00 IST (03:30 UTC)</SelectItem>
+                        <SelectItem value="0 0 * * 0">Weekly on Sunday at 00:00 IST (18:30 UTC Sat)</SelectItem>
+                        <SelectItem value="0 0 1 * *">Monthly on 1st at 00:00 IST (18:30 UTC prev day)</SelectItem>
                       </SelectContent>
                     </Select>
+                    <div className="text-sm text-muted-foreground mt-2">
+                      <p>⏰ All times shown are in Indian Standard Time (IST)</p>
+                      <p>🌍 Cron jobs are automatically converted to UTC for scheduling</p>
+                    </div>
                   </div>
                 )}
 
@@ -268,6 +298,12 @@ export function CronSettings() {
                         </Label>
                         <Input id="minute" type="number" min="0" max="59" value={minute} onChange={(e) => setMinute(e.target.value)} placeholder="0" />
                       </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <p>
+                        ⏰ Indian Time: {hour.padStart(2, "0")}:{minute.padStart(2, "0")}
+                      </p>
+                      <p>🌍 UTC Time: {convertToUTC(parseInt(hour), parseInt(minute))}</p>
                     </div>
                     <div className="text-sm">
                       <span className="text-muted-foreground">Preview: </span>

@@ -2,12 +2,7 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { action, internalMutation, internalQuery } from "../_generated/server";
-import {
-  aggregateByCommitCount,
-  aggregateByCommitSummary,
-  aggregateByRepoCount,
-  aggregateByTotalBlogCount,
-} from "../aggregation";
+import { aggregateByCommitCount, aggregateByCommitSummary, aggregateByRepoCount, aggregateByTotalBlogCount } from "../aggregation";
 import { authenticatedMutation, authenticatedQuery } from "../lib/auth";
 
 export const UserSchema = defineTable({
@@ -100,12 +95,7 @@ export const updateInstalltionId = internalMutation({
       for (const repo of args.repositories) {
         const currentRepo = await ctx.db
           .query("repos")
-          .filter((q) =>
-            q.and(
-              q.eq(q.field("installationId"), args.installationId),
-              q.eq(q.field("repoUrl"), `https://github.com/${repo}`),
-            ),
-          )
+          .filter((q) => q.and(q.eq(q.field("installationId"), args.installationId), q.eq(q.field("repoUrl"), `https://github.com/${repo}`)))
           .unique();
 
         if (currentRepo) {
@@ -182,5 +172,20 @@ export const updateUser = authenticatedMutation({
     await ctx.db.patch(ctx.user._id, {
       name,
     });
+  },
+});
+export const getInstallationUrl = authenticatedQuery({
+  args: {},
+  handler: async (ctx, args) => {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    const state = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
+    const params = new URLSearchParams({
+      client_id: process.env.GITHUB_CLIENT_ID!,
+      state: state,
+    });
+    const appSlug = process.env.GITHUB_APP_SLUG!;
+    const authUrl = `https://github.com/apps/${appSlug}/installations/new?${params.toString()}`;
+    return authUrl;
   },
 });

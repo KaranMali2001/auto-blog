@@ -3,11 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { axiosInstance } from "@/lib/axios";
-import { useAuth } from "@clerk/nextjs";
+import { useQueryWithStatus } from "@/app/Providers";
 import { AlertCircle, CheckCircle, Github } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 
 type UserProfile = {
@@ -19,42 +18,8 @@ type UserProfile = {
 };
 
 export function GithubIntegration({ userData }: { userData: UserProfile }) {
-  const { getToken } = useAuth();
-  const [authUrl, setAuthUrl] = useState<string>("");
-  const [error, setError] = useState<string>("");
   const isInstalled = Boolean(userData.installationId);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchAuthUrl = async () => {
-      try {
-        const token = await getToken({ template: "convex" });
-        const response = await axiosInstance.get("/api/installationUrl", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (isMounted) {
-          if (response.status === 200) {
-            setAuthUrl(response.data.authUrl);
-          } else {
-            throw new Error("Failed to get GitHub installation URL");
-          }
-        }
-      } catch (err: any) {
-        console.error("Error fetching GitHub auth URL:", err);
-        if (isMounted) {
-          setError(err.response?.data?.message || err.message || "Failed to get GitHub installation URL");
-        }
-      }
-    };
-
-    fetchAuthUrl();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [getToken]);
+  const { data: authUrl, error: queryError } = useQueryWithStatus(api.schema.user.getInstallationUrl);
 
   return (
     <Card>
@@ -64,26 +29,20 @@ export function GithubIntegration({ userData }: { userData: UserProfile }) {
           GitHub Integration
         </CardTitle>
         <CardDescription>
-          {isInstalled
-            ? "Your GitHub account is connected and ready to use."
-            : "Connect your GitHub account to automatically create repositories for your blog posts."}
+          {isInstalled ? "Your GitHub account is connected and ready to use." : "Connect your GitHub account to automatically create repositories for your blog posts."}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {error ? (
+        {queryError ? (
           <div className="flex items-center gap-2 text-destructive">
             <AlertCircle className="h-4 w-4" />
-            <span>{error}</span>
+            <span>{queryError?.message}</span>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {isInstalled ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                ) : (
-                  <AlertCircle className="h-4 w-4 text-yellow-500" />
-                )}
+                {isInstalled ? <CheckCircle className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-yellow-500" />}
                 <span>{isInstalled ? "GitHub is connected" : "GitHub is not connected"}</span>
               </div>
               <div className="flex gap-3">

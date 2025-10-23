@@ -49,6 +49,7 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
   const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
   const [userInput, setUserInput] = useState("");
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isMessageExpanded, setIsMessageExpanded] = useState(false);
   const regenerateSummary = useMutation(api.schema.commit.regenerateSummary);
   const [editedContent, setEditedContent] = useState(commit.summarizedCommitDiff || "");
   const tags = extractTags(commit.summarizedCommitDiff || "");
@@ -57,6 +58,12 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
     day: "numeric",
     year: "numeric",
   });
+
+  const MAX_MESSAGE_LENGTH = 100;
+  const shouldTruncate = commit.commitMessage.length > MAX_MESSAGE_LENGTH;
+  const displayMessage = shouldTruncate && !isMessageExpanded
+    ? commit.commitMessage.slice(0, MAX_MESSAGE_LENGTH) + "..."
+    : commit.commitMessage;
 
   const handleSave = () => {
     onUpdateSummary(commit._id, editedContent);
@@ -93,7 +100,17 @@ export function CommitCard({ commit, extractTags, renderMarkdown, onDelete, onUp
         {/* Commit Header */}
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2 flex-1">
-            <h3 className="font-semibold text-lg leading-tight">{commit.commitMessage}</h3>
+            <div>
+              <h3 className="font-semibold text-lg leading-tight">{displayMessage}</h3>
+              {shouldTruncate && (
+                <button
+                  onClick={() => setIsMessageExpanded(!isMessageExpanded)}
+                  className="text-sm text-primary hover:underline mt-1"
+                >
+                  {isMessageExpanded ? "Read less" : "Read more"}
+                </button>
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               {commit.commitAuthor && (
                 <span className="flex items-center gap-1.5">
