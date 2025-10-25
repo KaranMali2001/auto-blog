@@ -1,70 +1,89 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
 import { useQueryWithStatus } from "@/app/Providers";
-import { AlertCircle, CheckCircle, Github } from "lucide-react";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/error-state";
+import { Spinner } from "@/components/ui/spinner";
+import { CheckCircle2, FolderGit2, Github } from "lucide-react";
+
+import { User } from "@/types/index";
 import { api } from "../../../convex/_generated/api";
-import { Id } from "../../../convex/_generated/dataModel";
+export function GitHubSection({ user }: { user: User }) {
+  const isConnected = user?.installationId;
 
-type UserProfile = {
-  _id: Id<"users">;
-  installationId?: number;
-  name?: string;
-  email: string;
-  imageUrl: string;
-};
-
-export function GithubIntegration({ userData }: { userData: UserProfile }) {
-  const isInstalled = Boolean(userData.installationId);
-  const { data: authUrl, error: queryError } = useQueryWithStatus(api.schema.user.getInstallationUrl);
-
+  const { data: repos, error: reposError, isPending: isReposPending } = useQueryWithStatus(api.schema.repo.getRepos);
+  if (reposError) {
+    return <ErrorState icon={<FolderGit2 />} title={"An Error occured while loading repositories"} />;
+  }
+  if (isReposPending) {
+    return <Spinner centered title="Loading GitHub repositories..." />;
+  }
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Github className="h-5 w-5" />
-          GitHub Integration
-        </CardTitle>
-        <CardDescription>
-          {isInstalled ? "Your GitHub account is connected and ready to use." : "Connect your GitHub account to automatically create repositories for your blog posts."}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {queryError ? (
-          <div className="flex items-center gap-2 text-destructive">
-            <AlertCircle className="h-4 w-4" />
-            <span>{queryError?.message}</span>
+    <div className="space-y-8">
+      {/* Connection Status Card */}
+      <div className="rounded-lg border border-border bg-card p-6">
+        {isConnected ? (
+          <div className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-card-foreground">GitHub App Connected</h3>
+                  <p className="text-sm text-muted-foreground">Installation ID: {user.installationId}</p>
+                </div>
+              </div>
+              <Badge variant={"success"}>Connected</Badge>
+            </div>
+
+            <div className="flex gap-3">
+              <Button variant="outline" size="sm">
+                Update Connection
+              </Button>
+              <Button variant="destructive" size="sm">
+                Disconnect
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {isInstalled ? <CheckCircle className="h-4 w-4 text-green-500" /> : <AlertCircle className="h-4 w-4 text-yellow-500" />}
-                <span>{isInstalled ? "GitHub is connected" : "GitHub is not connected"}</span>
-              </div>
-              <div className="flex gap-3">
-                {authUrl ? (
-                  <Button asChild variant={isInstalled ? "outline" : "default"} className="gap-2">
-                    <Link href={authUrl}>
-                      <Github className="h-5 w-5" />
-                      {isInstalled ? "Update" : "Connect GitHub"}
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button disabled className="gap-2">
-                    <Github className="h-5 w-5" />
-                    Loading...
-                  </Button>
-                )}
-              </div>
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <Github className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-sm text-muted-foreground">Required permissions: repo, workflow, read:user, user:email</p>
+            <h3 className="mb-2 font-semibold text-card-foreground">Connect your GitHub account</h3>
+            <p className="mb-6 text-sm text-muted-foreground">Analyze commits and generate blog posts automatically</p>
+            <Button variant="primary">
+              <Github className="h-4 w-4" />
+              Connect GitHub
+            </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Connected Repositories */}
+      {isConnected && repos.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-card-foreground">Connected Repositories</h2>
+          <div className="space-y-3">
+            {repos.map((repo) => (
+              <div key={repo._id} className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/50">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <FolderGit2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-card-foreground">{repo.name}</h4>
+                    <a href={repo.repoUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                      {repo.repoUrl}
+                    </a>
+                  </div>
+                </div>
+                {/* <Badge variant="outline">{repo.} commits</Badge> */}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

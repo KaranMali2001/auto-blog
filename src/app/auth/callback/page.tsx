@@ -7,7 +7,7 @@ import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../../../convex/_generated/api";
 
-export function CallbackComponent() {
+function CallbackComponent() {
   const searchParams = useSearchParams();
   const installation_id = searchParams.get("installation_id");
   const setup_action = searchParams.get("setup_action");

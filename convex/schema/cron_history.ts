@@ -67,7 +67,11 @@ export const executeCronJob = internalMutation({
           .filter((q) => q.gte(q.field("_creationTime"), Date.now() - 24 * 60 * 60 * 1000))
           .collect();
       });
+
       const allCommits = (await Promise.all(commitSummaryPromises)).flat();
+      if (allCommits.length === 0) {
+        throw new Error("No commits found for today");
+      }
       const commitSummaries = allCommits.map((commit) => ({
         summarizedCommitDiff: commit.summarizedCommitDiff || "",
         commitMessage: commit.commitMessage,

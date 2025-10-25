@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
 
   output: "standalone",
 };
