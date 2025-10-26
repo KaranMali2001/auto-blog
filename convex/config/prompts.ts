@@ -200,7 +200,7 @@ Improved:
 I implemented OAuth 2.0 authentication to replace our session-based system. I chose OAuth specifically because we needed third-party login (Google, GitHub) and wanted to avoid storing passwords directly—the authorization code flow with PKCE gives us secure token exchange without exposing credentials.
 
 ## Technical Implementation
-I integrated the authorization-code-flow using the \'passport\' library (v0.6.0) with custom strategies for each provider. The tricky part was handling token refresh—I built a middleware that intercepts 401 responses and automatically refreshes access tokens using the stored refresh token before retrying the original request. State validation prevents CSRF attacks by generating cryptographic random state parameters that are verified on callback.
+I integrated the authorization-code-flow using the 'passport' library (v0.6.0) with custom strategies for each provider. The tricky part was handling token refresh—I built a middleware that intercepts 401 responses and automatically refreshes access tokens using the stored refresh token before retrying the original request. State validation prevents CSRF attacks by generating cryptographic random state parameters that are verified on callback.
 
 ---
 

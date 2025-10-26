@@ -58,10 +58,10 @@ function parseCronExpression(cronExpression: string): { hour: number; minute: nu
     throw new Error("Invalid cron expression format");
   }
 
-  const minute = parseInt(parts[0]);
-  const hour = parseInt(parts[1]);
+  const minute = parseInt(parts[0], 10);
+  const hour = parseInt(parts[1], 10);
 
-  if (isNaN(minute) || isNaN(hour)) {
+  if (Number.isNaN(minute) || Number.isNaN(hour)) {
     throw new Error("Invalid hour or minute in cron expression");
   }
 

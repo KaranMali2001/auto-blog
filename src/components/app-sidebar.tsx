@@ -5,18 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 export interface UserData {
   name: string;
@@ -70,7 +59,7 @@ export function AppSidebar({ userData }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
-                const isActive = pathname === item.url || pathname.startsWith(item.url + "/");
+                const isActive = pathname === item.url || pathname.startsWith(`${item.url}/`);
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -94,17 +83,7 @@ export function AppSidebar({ userData }: AppSidebarProps) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/settings" className="w-full">
                 <div className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full">
-                  {userData?.imageUrl ? (
-                    <Image
-                      src={userData.imageUrl}
-                      alt={userData.name}
-                      width={32}
-                      height={32}
-                      className="size-full object-cover"
-                    />
-                  ) : (
-                    <User className="size-4" />
-                  )}
+                  {userData?.imageUrl ? <Image src={userData.imageUrl} alt={userData.name} width={32} height={32} className="size-full object-cover" /> : <User className="size-4" />}
                 </div>
                 <div className="grid flex-1 min-w-0">
                   <span className="truncate font-medium text-sm">{userData?.name || "User"}</span>

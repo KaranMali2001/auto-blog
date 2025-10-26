@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 
-import { GitHubWebhookPayload } from "@/types/github";
+import type { GitHubWebhookPayload } from "@/types/github";
 import { internal } from "../_generated/api";
 import { httpAction } from "../_generated/server";
 

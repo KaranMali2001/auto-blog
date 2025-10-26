@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useSignIn } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { AlertCircle, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function PasswordComponent({ email }: { email: string }) {
   const { isLoaded, signIn, setActive } = useSignIn();
@@ -30,7 +30,7 @@ export default function PasswordComponent({ email }: { email: string }) {
       });
 
       if (result.status === "complete") {
-        await setActive!({ session: result.createdSessionId });
+        await setActive?.({ session: result.createdSessionId });
         router.push("/dashboard");
       }
     } catch (err) {
@@ -47,19 +47,9 @@ export default function PasswordComponent({ email }: { email: string }) {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md p-8 space-y-6 bg-white text-gray-900 rounded-lg shadow-xl"
-      >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md p-8 space-y-6 bg-white text-gray-900 rounded-lg shadow-xl">
         <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleGoBack}
-            className="flex items-center text-gray-600 hover:text-gray-900"
-          >
+          <Button variant="ghost" size="sm" onClick={handleGoBack} className="flex items-center text-gray-600 hover:text-gray-900">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Go Back
           </Button>
@@ -77,11 +67,7 @@ export default function PasswordComponent({ email }: { email: string }) {
                 disabled={isLoading}
                 className="pr-10"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-              >
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600">
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>

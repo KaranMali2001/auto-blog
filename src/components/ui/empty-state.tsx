@@ -1,7 +1,7 @@
 "use client";
 
+import type * as React from "react";
 import { cn } from "@/lib/utils";
-import * as React from "react";
 import { Button } from "./button";
 
 export interface EmptyStateProps {

@@ -1,6 +1,6 @@
-import { AnalyticsPage } from "@/components/analyticComponents/analytics";
 import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
+import { AnalyticsPage } from "@/components/analyticComponents/analytics";
 import { api } from "../../../../convex/_generated/api";
 
 export default async function Page() {

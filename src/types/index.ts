@@ -2,7 +2,7 @@
  * Type definitions for Auto-Blog Claude implementation
  */
 
-import { Id } from "../../convex/_generated/dataModel";
+import type { Id } from "../../convex/_generated/dataModel";
 
 // Blog Types
 export interface Blog {

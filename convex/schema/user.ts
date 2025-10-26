@@ -177,7 +177,7 @@ export const updateUser = authenticatedMutation({
 });
 export const getInstallationUrl = authenticatedQuery({
   args: {},
-  handler: async (ctx, args) => {
+  handler: async (_ctx, _args) => {
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
     const state = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");

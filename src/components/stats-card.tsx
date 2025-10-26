@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
+import { cn } from "@/lib/utils";
 
 export interface StatsCardProps {
   label: string;
@@ -22,7 +22,7 @@ export function StatsCard({ label, value, icon, trend, className, onClick }: Sta
       className={cn(
         "group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-lg",
         onClick && "cursor-pointer hover:scale-[1.02]",
-        className
+        className,
       )}
       onClick={onClick}
     >

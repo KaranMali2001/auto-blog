@@ -13,15 +13,12 @@ export const regenerateSummary = internalAction({
     userInput: v.string(),
   },
   handler: async (ctx, args) => {
-    const { commit, filesChanged, stats, filteredDiff } = await ctx.runAction(
-      internal.action_helpers.github.getCommitData,
-      {
-        installationId: args.installationId,
-        commitSha: args.commitSha,
-        owner: args.owner,
-        repo: args.repo,
-      },
-    );
+    const { commit, filesChanged, stats, filteredDiff } = await ctx.runAction(internal.action_helpers.github.getCommitData, {
+      installationId: args.installationId,
+      commitSha: args.commitSha,
+      owner: args.owner,
+      repo: args.repo,
+    });
     const newSummary = await ctx.runAction(internal.action_helpers.gemini.regenerateSummary, {
       commitMessage: commit.commit.message,
       filesChanged,

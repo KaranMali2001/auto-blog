@@ -1,8 +1,8 @@
 "use client";
 
+import { Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Sparkles, X } from "lucide-react";
 
 export interface FloatingActionBarProps {
   selectedCount: number;

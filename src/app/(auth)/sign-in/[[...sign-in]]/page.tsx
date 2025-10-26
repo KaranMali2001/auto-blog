@@ -1,9 +1,9 @@
 "use client";
+import { useSignIn } from "@clerk/nextjs";
+import { useState } from "react";
 import EmailComponent from "@/components/authComponents/emailComponent";
 import { OtpComponent } from "@/components/authComponents/otpComponent";
 import PasswordComponent from "@/components/authComponents/passwordComponent";
-import { useSignIn } from "@clerk/nextjs";
-import { useState } from "react";
 
 type Strategy = "email" | "password" | "otp";
 export default function SignIn() {
@@ -26,9 +26,7 @@ export default function SignIn() {
         return;
       } else {
         if (result.status === "needs_first_factor") {
-          const firstFactor = result.supportedFirstFactors.find(
-            (factor) => factor.strategy === "password" || factor.strategy === "email_code",
-          );
+          const firstFactor = result.supportedFirstFactors.find((factor) => factor.strategy === "password" || factor.strategy === "email_code");
 
           if (!firstFactor) {
             setError("Unable to proceed with authentication");

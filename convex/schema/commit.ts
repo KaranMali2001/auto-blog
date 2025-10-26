@@ -140,7 +140,7 @@ export const getCommitsByIds = authenticatedQuery({
           return null;
         }
         return commit;
-      })
+      }),
     );
     return commits.filter((commit): commit is NonNullable<typeof commit> => commit !== null);
   },

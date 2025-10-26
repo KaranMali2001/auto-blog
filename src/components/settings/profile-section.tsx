@@ -1,8 +1,8 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { User } from "@/types/index";
 import { User2 } from "lucide-react";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { User } from "@/types/index";
 
 export function ProfileSection({ user }: { user: User | undefined }) {
   if (!user) {

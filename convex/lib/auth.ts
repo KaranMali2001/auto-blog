@@ -2,6 +2,7 @@ import { customMutation, customQuery } from "convex-helpers/server/customFunctio
 
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { mutation, query } from "../_generated/server";
+
 async function getUserFromAuth(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {

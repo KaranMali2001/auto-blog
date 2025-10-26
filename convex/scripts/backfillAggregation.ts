@@ -47,7 +47,7 @@ export const backFillAggregation = internalMutation({
         try {
           await aggregateByCommitCount.delete(ctx, commit);
           await aggregateByCommitSummary.delete(ctx, commit);
-        } catch (error) {
+        } catch (_error) {
           // Entry doesn't exist in aggregate, that's fine
         }
       }
@@ -61,7 +61,7 @@ export const backFillAggregation = internalMutation({
       for (const repo of existingRepos) {
         try {
           await aggregateByRepoCount.delete(ctx, repo);
-        } catch (error) {
+        } catch (_error) {
           // Entry doesn't exist in aggregate, that's fine
         }
       }

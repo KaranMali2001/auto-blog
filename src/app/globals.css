@@ -211,95 +211,95 @@ body {
 }
 
 .dark-theme .mdxeditor-toolbar {
-  background: var(--muted) !important;
-  border-bottom: 1px solid var(--border) !important;
+  background: var(--muted);
+  border-bottom: 1px solid var(--border);
 }
 
 .dark-theme .mdxeditor-toolbar button,
 .dark-theme .mdxeditor-toolbar select {
-  background: transparent !important;
-  color: var(--foreground) !important;
-  border-color: transparent !important;
+  background: transparent;
+  color: var(--foreground);
+  border-color: transparent;
 }
 
 .dark-theme .mdxeditor-toolbar button:hover {
-  background: var(--accent) !important;
-  color: var(--accent-foreground) !important;
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .dark-theme .mdxeditor-toolbar button[data-state="on"],
 .dark-theme .mdxeditor-toolbar button[aria-pressed="true"] {
-  background: var(--accent) !important;
-  color: var(--accent-foreground) !important;
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .dark-theme .mdxeditor-toolbar svg {
-  color: var(--foreground) !important;
-  fill: currentColor !important;
+  color: var(--foreground);
+  fill: currentColor;
 }
 
 .dark-theme .mdxeditor-root-contenteditable {
-  background: var(--background) !important;
-  color: var(--foreground) !important;
-  padding: 1rem !important;
+  background: var(--background);
+  color: var(--foreground);
+  padding: 1rem;
 }
 
 .dark-theme .mdxeditor-popup-container {
-  background: var(--card) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3) !important;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
 }
 
 .dark-theme .mdxeditor-popup-container input,
 .dark-theme .mdxeditor-popup-container button {
-  background: var(--background) !important;
-  color: var(--foreground) !important;
-  border-color: var(--border) !important;
+  background: var(--background);
+  color: var(--foreground);
+  border-color: var(--border);
 }
 
 .dark-theme .mdxeditor-popup-container button:hover {
-  background: var(--muted) !important;
+  background: var(--muted);
 }
 
 /* CodeMirror Dark Theme */
 .dark-theme .cm-editor {
-  background: var(--muted) !important;
-  color: var(--foreground) !important;
+  background: var(--muted);
+  color: var(--foreground);
 }
 
 .dark-theme .cm-content {
-  color: var(--foreground) !important;
-  caret-color: var(--foreground) !important;
+  color: var(--foreground);
+  caret-color: var(--foreground);
 }
 
 .dark-theme .cm-gutters {
-  background: var(--card) !important;
-  color: var(--muted-foreground) !important;
-  border-right: 1px solid var(--border) !important;
+  background: var(--card);
+  color: var(--muted-foreground);
+  border-right: 1px solid var(--border);
 }
 
 .dark-theme .cm-line {
-  color: var(--foreground) !important;
+  color: var(--foreground);
 }
 
 .dark-theme .cm-cursor {
-  border-left-color: var(--foreground) !important;
+  border-left-color: var(--foreground);
 }
 
 .dark-theme .cm-selectionBackground {
-  background: var(--accent) !important;
+  background: var(--accent);
 }
 
 /* Selection Colors */
 .dark-theme .mdxeditor-root-contenteditable ::selection,
 .dark-theme .cm-content ::selection {
-  background: var(--primary) !important;
-  color: var(--primary-foreground) !important;
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
 /* Compact Sidebar Hover Expansion */
 .group\/compact-sidebar[data-state="collapsed"]:hover [data-sidebar="sidebar-container"] {
-  width: 16rem !important;
+  width: 16rem;
   transition: width 200ms ease-in-out;
 }
 

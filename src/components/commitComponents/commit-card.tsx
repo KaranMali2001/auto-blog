@@ -1,13 +1,13 @@
 "use client";
 
+import { ChevronDown, ChevronUp, ExternalLink, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn, formatRelativeTime, truncate } from "@/lib/utils";
 import type { Commit, Repository } from "@/types/index";
-import { ChevronDown, ChevronUp, ExternalLink, RefreshCw } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
 
 export interface CommitCardProps {
   commit: Commit;
@@ -38,7 +38,7 @@ export function CommitCard({ commit, repository, selected = false, onSelect, var
         selected && "border-primary bg-primary/5 ring-1 ring-primary/20",
         !selected && "border-border",
         variant === "compact" && "p-3",
-        variant !== "compact" && "p-4"
+        variant !== "compact" && "p-4",
       )}
       onClick={handleCardClick}
     >

@@ -1,7 +1,10 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { Github, Search } from "lucide-react";
+import * as React from "react";
+import { toast } from "sonner";
 import { useQueryWithStatus } from "@/app/Providers";
-
 import { BlogGenerationModal } from "@/components/blogComponents/blog-generation-modal";
 import { CommitSummaryModal } from "@/components/commitComponents/commit-summary-modal";
 import { MasonryView } from "@/components/commitComponents/masonry-view";
@@ -11,12 +14,8 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import type { BlogGenerationFormData, Commit } from "@/types/index";
-import { useMutation } from "convex/react";
-import { Github, Search } from "lucide-react";
-import * as React from "react";
-import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
-import { Id } from "../../../convex/_generated/dataModel";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 export function DashboardPage() {
   const [selectedCommits, setSelectedCommits] = React.useState<Set<string>>(new Set());
@@ -38,7 +37,7 @@ export function DashboardPage() {
       (commit) =>
         commit.commitMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
         commit.commitSha.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        commit.commitAuthor?.toLowerCase().includes(searchQuery.toLowerCase())
+        commit.commitAuthor?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [commits, searchQuery]);
 

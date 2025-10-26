@@ -1,5 +1,10 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { Calendar, FileText, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { useQueryWithStatus } from "@/app/Providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,13 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Spinner } from "@/components/ui/spinner";
-import { useMutation } from "convex/react";
-import { Calendar, FileText, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
-import { Id } from "../../../convex/_generated/dataModel";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 export function BlogsPage() {
   const { data: blogs, isPending, error } = useQueryWithStatus(api.schema.blog.getBlogs);

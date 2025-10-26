@@ -1,6 +1,6 @@
 import { TableAggregate } from "@convex-dev/aggregate";
 import { components } from "./_generated/api";
-import { DataModel, Doc, Id } from "./_generated/dataModel";
+import type { DataModel, Doc, Id } from "./_generated/dataModel";
 
 export const aggregateByCommitCount = new TableAggregate<{
   DataModel: DataModel;

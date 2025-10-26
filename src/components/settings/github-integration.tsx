@@ -1,3 +1,7 @@
+import { useMutation, useQuery } from "convex/react";
+import { CheckCircle2, ExternalLink, FolderGit2, Github, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { useQueryWithStatus } from "@/app/Providers";
 import {
   AlertDialog,
@@ -14,12 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
 import { Spinner } from "@/components/ui/spinner";
-import { useMutation, useQuery } from "convex/react";
-import { CheckCircle2, ExternalLink, FolderGit2, Github, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
-import { User } from "@/types/index";
+import type { User } from "@/types/index";
 import { api } from "../../../convex/_generated/api";
 export function GitHubSection({ user }: { user: User }) {
   const isConnected = user?.installationId;

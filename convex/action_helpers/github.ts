@@ -1,11 +1,12 @@
 "use node";
-import { shouldExcludeFile } from "@/utils/utils";
+import crypto from "node:crypto";
 import { v } from "convex/values";
-import crypto from "crypto";
+import { shouldExcludeFile } from "@/utils/utils";
 import { internal } from "../_generated/api";
-import { ActionCtx, internalAction } from "../_generated/server";
+import { type ActionCtx, internalAction } from "../_generated/server";
 import { githubApp } from "../config/github";
 import { singleCommitPrompt } from "../config/prompts";
+
 const WEBHOOK_SECRET: string = process.env.GITHUB_WEBHOOK_SECRET!;
 
 export const getCommitDiffAction = internalAction({
@@ -83,7 +84,7 @@ export const getCommitDiffAction = internalAction({
 
 export const VerifyGithubWebhookAction = internalAction({
   args: { signature: v.string(), body: v.string() },
-  handler: async (ctx: ActionCtx, args): Promise<boolean> => {
+  handler: async (_ctx: ActionCtx, args): Promise<boolean> => {
     const hmac = crypto.createHmac("sha256", WEBHOOK_SECRET);
     const digest: string = `sha256=${hmac.update(args.body).digest("hex")}`;
 
@@ -133,7 +134,7 @@ export const getCommitData = internalAction({
     owner: v.string(),
     repo: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const app = githubApp();
     const installationOctokit = await app.getInstallationOctokit(args.installationId);
 

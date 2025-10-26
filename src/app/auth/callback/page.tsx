@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAction } from "convex/react";
 import { motion } from "framer-motion";
 import { AlertCircle, CheckCircle2, Github, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "../../../../convex/_generated/api";
 
 type Status = "loading" | "success" | "error" | "idle";
@@ -16,7 +16,7 @@ function CallbackComponent() {
   const searchParams = useSearchParams();
   const installation_id = searchParams.get("installation_id");
   const setup_action = searchParams.get("setup_action");
-  const state = searchParams.get("state");
+  const _state = searchParams.get("state");
 
   const updateInstallation = useAction(api.schema.user.updateInstattionId);
   const router = useRouter();

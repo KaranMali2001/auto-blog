@@ -1,10 +1,10 @@
 "use client";
 
+import { ExternalLink, GitCommit, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import type { Commit } from "@/types/index";
-import { ExternalLink, GitCommit, Sparkles } from "lucide-react";
-import Link from "next/link";
 
 interface MasonryViewProps {
   commit: Commit;
@@ -33,7 +33,7 @@ export function MasonryView({ commit, selected = false, onSelect, onClick }: Mas
         "group relative rounded-xl border bg-gradient-to-br transition-all duration-300",
         "cursor-pointer hover:shadow-xl hover:scale-[1.02]",
         selected ? "border-primary/60 from-primary/10 to-primary/5" : "border-border/50 from-card to-card/50 hover:border-primary/30",
-        "overflow-hidden"
+        "overflow-hidden",
       )}
       onClick={handleCardClick}
     >

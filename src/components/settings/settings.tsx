@@ -1,11 +1,11 @@
 "use client";
 
+import { Calendar, Github, User2 } from "lucide-react";
 import { useQueryWithStatus } from "@/app/Providers";
 import { CronSection } from "@/components/settings/cron-settings";
 import { GitHubSection } from "@/components/settings/github-integration";
 import { ProfileSection } from "@/components/settings/profile-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Github, User2 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { ErrorState } from "../ui/error-state";
 import { Spinner } from "../ui/spinner";

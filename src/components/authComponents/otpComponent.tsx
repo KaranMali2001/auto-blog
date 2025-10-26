@@ -1,11 +1,11 @@
 "use client";
 
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 
 export function OtpComponent({ strategy }: { strategy: string }) {
   const { signIn, setActive: setSignInActive } = useSignIn();
@@ -22,22 +22,22 @@ export function OtpComponent({ strategy }: { strategy: string }) {
 
     try {
       if (strategy === "email_code") {
-        const result = await signIn!.attemptFirstFactor({
+        const result = await signIn?.attemptFirstFactor({
           strategy: "email_code",
           code: otp,
         });
         if (result.status === "complete") {
-          await setSignInActive!({ session: result.createdSessionId });
+          await setSignInActive?.({ session: result.createdSessionId });
           router.push("/dashboard");
         }
       }
       if (strategy === "password") {
         if (!isLoaded) return;
-        const signUpAttempt = await signUp!.attemptEmailAddressVerification({
+        const signUpAttempt = await signUp?.attemptEmailAddressVerification({
           code: otp,
         });
         if (signUpAttempt.status === "complete") {
-          await setSignUpActive!({ session: signUpAttempt.createdSessionId });
+          await setSignUpActive?.({ session: signUpAttempt.createdSessionId });
           router.push("/dashboard");
         }
       }
@@ -56,42 +56,20 @@ export function OtpComponent({ strategy }: { strategy: string }) {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-xl"
-      >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-xl">
         <div className="flex items-center gap-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleGoBack}
-            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-          >
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleGoBack} className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </motion.button>
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-3xl font-bold text-gray-800"
-          >
+          <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-3xl font-bold text-gray-800">
             Verify Your Account
           </motion.h2>
         </div>
 
-        <p className="text-center text-gray-600">
-          We&apos;ve sent a 6-digit verification code to your email. Please enter the code below to confirm your
-          account.
-        </p>
+        <p className="text-center text-gray-600">We&apos;ve sent a 6-digit verification code to your email. Please enter the code below to confirm your account.</p>
 
         {error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="p-3 text-sm text-red-500 bg-red-100 border border-red-400 rounded-md"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 text-sm text-red-500 bg-red-100 border border-red-400 rounded-md">
             {error}
           </motion.div>
         )}

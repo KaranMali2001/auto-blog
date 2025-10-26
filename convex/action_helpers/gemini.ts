@@ -1,13 +1,9 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";
-import { MODEL, genAI } from "../config/gemini";
+import { genAI, MODEL } from "../config/gemini";
 import { buildLinkedInPrompt, buildTwitterPrompt } from "../config/promptHelpers";
-import {
-  generateLinkedInPostPrompt,
-  generateTwitterPostPrompt,
-  regenerateSummaryWithUserInput,
-} from "../config/prompts";
+import { generateLinkedInPostPrompt, generateTwitterPostPrompt, regenerateSummaryWithUserInput } from "../config/prompts";
 
 export const getSummary = internalAction({
   args: {
@@ -20,7 +16,7 @@ export const getSummary = internalAction({
     fileContent: v.string(),
     prompt: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const start = Date.now();
 
     const fullPrompt = args.prompt
@@ -53,7 +49,7 @@ export const regenerateSummary = internalAction({
     previousSummary: v.string(),
     userInput: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     const start = Date.now();
     const fullPrompt = regenerateSummaryWithUserInput
       .replace("{commitMessage}", args.commitMessage)
@@ -89,9 +85,7 @@ export const generateBlog = internalAction({
     platform: v.union(v.literal("linkedin"), v.literal("twitter")),
     options: v.optional(
       v.object({
-        toneType: v.optional(
-          v.union(v.literal("technical"), v.literal("business"), v.literal("hiring manager"), v.string()),
-        ),
+        toneType: v.optional(v.union(v.literal("technical"), v.literal("business"), v.literal("hiring manager"), v.string())),
         length: v.union(v.literal("short"), v.literal("medium"), v.literal("long")),
       }),
     ),

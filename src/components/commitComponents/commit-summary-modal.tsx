@@ -1,11 +1,11 @@
 "use client";
 
+import { Calendar, ExternalLink, FileCode, FolderGit2, Sparkles, User } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Commit } from "@/types/index";
-import { Calendar, ExternalLink, FileCode, FolderGit2, Sparkles, User } from "lucide-react";
-import Link from "next/link";
 
 interface CommitSummaryModalProps {
   commit: Commit | null;

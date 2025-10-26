@@ -1,4 +1,4 @@
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -60,7 +60,7 @@ export function formatDateTime(date: Date | number): string {
  */
 export function truncate(text: string, length: number): string {
   if (text.length <= length) return text;
-  return text.slice(0, length) + "...";
+  return `${text.slice(0, length)}...`;
 }
 
 /**
@@ -85,7 +85,7 @@ export function formatCronExpression(cron: string): string {
   // Weekly pattern
   if (dayOfMonth === "*" && month === "*" && dayOfWeek !== "*") {
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const day = days[Number.parseInt(dayOfWeek)] || dayOfWeek;
+    const day = days[Number.parseInt(dayOfWeek, 10)] || dayOfWeek;
     return `Every ${day} at ${hour}:${minute}`;
   }
 

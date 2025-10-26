@@ -1,3 +1,6 @@
+import { useMutation } from "convex/react";
+import { Calendar, Edit, History, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { useQueryWithStatus } from "@/app/Providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,10 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { formatCronExpression, formatDateTime } from "@/lib/utils";
-import { UserCron } from "@/types";
-import { useMutation } from "convex/react";
-import { Calendar, Edit, History, Plus, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import type { UserCron } from "@/types";
 import { api } from "../../../convex/_generated/api";
 
 // Cron Section

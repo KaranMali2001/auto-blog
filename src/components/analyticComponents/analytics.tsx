@@ -1,11 +1,11 @@
 "use client";
 
+import { FileText, FolderGit2, GitCommit, Linkedin, TrendingUp, Twitter } from "lucide-react";
+import { useMemo } from "react";
 import { StatsCard } from "@/components/stats-card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Blog, stats } from "@/types/index";
-import { FileText, FolderGit2, GitCommit, Linkedin, TrendingUp, Twitter } from "lucide-react";
-import { useMemo } from "react";
+import type { Blog, stats } from "@/types/index";
 
 export function AnalyticsPage({ blogs, stats }: { blogs: Blog[]; stats: stats }) {
   // Calculate analytics
