@@ -1,7 +1,15 @@
-import { useMutation } from "convex/react";
-import { Calendar, Edit, History, Plus, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { useQueryWithStatus } from "@/app/Providers";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -11,11 +19,17 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { formatCronExpression, formatDateTime } from "@/lib/utils";
 import type { UserCron } from "@/types";
+import { useMutation } from "convex/react";
+import { Calendar, Edit, History, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+import { CreateCronModal } from "./create-cron-modal";
 
 // Cron Section
 export function CronSection() {
   const updateCronStatus = useMutation(api.schema.user_cron.updateUserCronStatus);
+  const deleteUserCron = useMutation(api.schema.user_cron.deleteUserCron);
   const { data: userCronsWithHistory, error: userCronsError, isPending: isUserCronsPending } = useQueryWithStatus(api.schema.user_cron.getUserCronsWithHistory);
   const { data: repos, error: reposError, isPending: isReposPending } = useQueryWithStatus(api.schema.repo.getRepos);
   if (userCronsError) {
@@ -48,6 +62,16 @@ export function CronSection() {
     }
   };
 
+  const handleDelete = async (cronId: Id<"userCrons">) => {
+    try {
+      await deleteUserCron({ userCronId: cronId });
+      toast.success("Schedule deleted successfully");
+    } catch (error) {
+      console.error("Error deleting cron:", error);
+      toast.error("Failed to delete schedule");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with Create Button */}
@@ -56,26 +80,17 @@ export function CronSection() {
           <h2 className="text-xl font-bold text-card-foreground">Automated Schedules</h2>
           <p className="text-sm text-muted-foreground">Configure automated blog generation schedules</p>
         </div>
-        <Button variant={"secondary"}>
-          <Plus className="h-4 w-4" />
-          Create Schedule
-        </Button>
+        <CreateCronModal repos={repos} />
       </div>
 
       {/* Cron List */}
       {userCrons.length === 0 ? (
-        <EmptyState
-          icon={<Calendar className="h-10 w-10" />}
-          title="No automated schedules"
-          description="Create a schedule to automatically generate blogs from your commits"
-          action={{
-            label: "Create Schedule",
-            onClick: () => {
-              // TODO: Open create schedule modal
-              toast.info("Create schedule modal coming soon");
-            },
-          }}
-        />
+        <div className="space-y-4">
+          <EmptyState icon={<Calendar className="h-10 w-10" />} title="No automated schedules" description="Create a schedule to automatically generate blogs from your commits" />
+          <div className="flex justify-center">
+            <CreateCronModal repos={repos} />
+          </div>
+        </div>
       ) : (
         <div className="space-y-4">
           {userCrons.map((cron) => (
@@ -125,9 +140,25 @@ export function CronSection() {
                   <Button variant="ghost" size="icon">
                     <History className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>This will permanently delete the schedule "{formatCronExpression(cron.cronExpression)}". This action cannot be undone.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(cron._id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </div>
