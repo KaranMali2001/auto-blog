@@ -3,8 +3,9 @@
 import { useQueryWithStatus } from "@/app/Providers";
 
 import { BlogGenerationModal } from "@/components/blogComponents/blog-generation-modal";
+import { CommitSummaryModal } from "@/components/commitComponents/commit-summary-modal";
+import { MasonryView } from "@/components/commitComponents/masonry-view";
 import { FloatingActionBar } from "@/components/floating-action-bar";
-import { RepositorySection } from "@/components/repositoryComponents/repository-section";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,10 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
   const [selectedCommits, setSelectedCommits] = React.useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [selectedCommitForSummary, setSelectedCommitForSummary] = React.useState<{
+    commit: Commit;
+    repository: Repository;
+  } | null>(null);
 
   // Fetch data from Convex
   const { data: commits, isPending: isCommitsPending, error: commitsError } = useQueryWithStatus(api.schema.commit.getCommits);
@@ -28,43 +33,23 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
   // Mutation for generating blog
   const generateBlog = useMutation(api.schema.blog.createBlog);
 
-  // Group commits by repository
-  const commitsByRepo = React.useMemo(() => {
-    if (!commits || !repos) return new Map<string, Commit[]>();
-
-    const grouped = new Map<string, Commit[]>();
-    repos.forEach((repo) => {
-      grouped.set(repo._id, []);
-    });
-
-    commits.forEach((commit) => {
-      const repoCommits = grouped.get(commit.repoId);
-      if (repoCommits) {
-        repoCommits.push(commit);
-      }
-    });
-
-    return grouped;
-  }, [commits, repos]);
-
   // Filter commits based on search
-  const filteredCommitsByRepo = React.useMemo(() => {
-    if (!searchQuery.trim()) return commitsByRepo;
+  const filteredCommits = React.useMemo(() => {
+    if (!commits) return [];
+    if (!searchQuery.trim()) return commits;
 
-    const filtered = new Map<string, Commit[]>();
-    commitsByRepo.forEach((commits, repoId) => {
-      const matchingCommits = commits.filter(
-        (commit) =>
-          commit.commitMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          commit.commitSha.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          commit.commitAuthor?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      if (matchingCommits.length > 0) {
-        filtered.set(repoId, matchingCommits);
-      }
-    });
-    return filtered;
-  }, [commitsByRepo, searchQuery]);
+    return commits.filter(
+      (commit) =>
+        commit.commitMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        commit.commitSha.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        commit.commitAuthor?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [commits, searchQuery]);
+
+  // Get repositories map for lookup
+  const reposMap = React.useMemo(() => {
+    return new Map(repos.map((repo) => [repo._id, repo]));
+  }, [repos]);
 
   // Handlers
   const handleSelectCommit = (commitId: string) => {
@@ -75,23 +60,6 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
       } else {
         next.add(commitId);
       }
-      return next;
-    });
-  };
-
-  const handleSelectAll = (repoId: string, commitIds: string[]) => {
-    setSelectedCommits((prev) => {
-      const next = new Set(prev);
-      const allSelected = commitIds.every((id) => next.has(id));
-
-      if (allSelected) {
-        // Deselect all
-        commitIds.forEach((id) => next.delete(id));
-      } else {
-        // Select all
-        commitIds.forEach((id) => next.add(id));
-      }
-
       return next;
     });
   };
@@ -129,6 +97,13 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
       console.error("Error generating blog:", error);
       toast.error("Failed to generate blog. Please try again.");
       throw error;
+    }
+  };
+
+  const handleCommitClick = (commit: Commit) => {
+    const repository = reposMap.get(commit.repoId);
+    if (repository) {
+      setSelectedCommitForSummary({ commit, repository });
     }
   };
 
@@ -172,6 +147,15 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
     );
   }
 
+  // No commits available
+  if (!commits || commits.length === 0) {
+    return (
+      <div className="container mx-auto max-w-7xl px-4 py-12">
+        <EmptyState icon={<Github className="h-10 w-10" />} title="No commits found" description="No commits available in your repositories" />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8">
       {/* Header */}
@@ -186,16 +170,25 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
         <Input type="search" placeholder="Search commits by message, SHA, or author..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
       </div>
 
-      {/* Repository Sections */}
-      {filteredCommitsByRepo.size === 0 ? (
+      {/* Masonry Grid */}
+      {filteredCommits.length === 0 ? (
         <EmptyState icon={<Search className="h-10 w-10" />} title="No commits found" description={searchQuery ? "Try adjusting your search query" : "No commits available in your repositories"} />
       ) : (
-        <div className="space-y-6">
-          {Array.from(filteredCommitsByRepo.entries()).map(([repoId, commits]) => {
-            const repository = repos.find((r) => r._id === repoId);
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredCommits.map((commit) => {
+            const repository = reposMap.get(commit.repoId);
             if (!repository) return null;
 
-            return <RepositorySection key={repoId} repository={repository} commits={commits} selectedCommits={selectedCommits} onSelectCommit={handleSelectCommit} onSelectAll={handleSelectAll} />;
+            return (
+              <MasonryView
+                key={commit._id}
+                commit={commit}
+                repository={repository}
+                selected={selectedCommits.has(commit._id)}
+                onSelect={handleSelectCommit}
+                onClick={() => handleCommitClick(commit)}
+              />
+            );
           })}
         </div>
       )}
@@ -205,6 +198,14 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
 
       {/* Blog Generation Modal */}
       <BlogGenerationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} selectedCommitCount={selectedCommits.size} onSubmit={handleSubmitBlogGeneration} />
+
+      {/* Commit Summary Modal */}
+      <CommitSummaryModal
+        commit={selectedCommitForSummary?.commit || null}
+        repository={selectedCommitForSummary?.repository || null}
+        isOpen={!!selectedCommitForSummary}
+        onClose={() => setSelectedCommitForSummary(null)}
+      />
     </div>
   );
 }

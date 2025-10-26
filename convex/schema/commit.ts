@@ -66,6 +66,7 @@ export const getCommits = authenticatedQuery({
     const commits = await ctx.db
       .query("commits")
       .withIndex("byUserId", (q) => q.eq("userId", ctx.user._id))
+      .order("desc")
       .collect();
 
     return commits;
@@ -139,7 +140,7 @@ export const getCommitsByIds = authenticatedQuery({
           return null;
         }
         return commit;
-      }),
+      })
     );
     return commits.filter((commit): commit is NonNullable<typeof commit> => commit !== null);
   },
