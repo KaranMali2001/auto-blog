@@ -40,7 +40,7 @@ export interface Repository {
   _creationTime: number;
   name: string;
   repoUrl: string;
-  installationId: number;
+
   userId: Id<"users">;
   owner?: string;
   commitCount?: number;

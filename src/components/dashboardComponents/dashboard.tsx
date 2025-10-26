@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import type { BlogGenerationFormData, Commit, Repository } from "@/types/index";
+import type { BlogGenerationFormData, Commit } from "@/types/index";
 import { useMutation } from "convex/react";
 import { Github, Search } from "lucide-react";
 import * as React from "react";
@@ -18,16 +18,12 @@ import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 
-export function DashboardPage({ repos }: { repos: Repository[] }) {
+export function DashboardPage() {
   const [selectedCommits, setSelectedCommits] = React.useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [selectedCommitForSummary, setSelectedCommitForSummary] = React.useState<{
-    commit: Commit;
-    repository: Repository;
-  } | null>(null);
+  const [selectedCommitForSummary, setSelectedCommitForSummary] = React.useState<Commit | null>(null);
 
-  // Fetch data from Convex
   const { data: commits, isPending: isCommitsPending, error: commitsError } = useQueryWithStatus(api.schema.commit.getCommits);
 
   // Mutation for generating blog
@@ -47,9 +43,6 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
   }, [commits, searchQuery]);
 
   // Get repositories map for lookup
-  const reposMap = React.useMemo(() => {
-    return new Map(repos.map((repo) => [repo._id, repo]));
-  }, [repos]);
 
   // Handlers
   const handleSelectCommit = (commitId: string) => {
@@ -101,13 +94,10 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
   };
 
   const handleCommitClick = (commit: Commit) => {
-    const repository = reposMap.get(commit.repoId);
-    if (repository) {
-      setSelectedCommitForSummary({ commit, repository });
-    }
+    setSelectedCommitForSummary(commit);
   };
 
-  // Loading state
+  // Only block on commits - repos can load progressively
   if (isCommitsPending) {
     return <Spinner centered title="Loading commits..." />;
   }
@@ -122,25 +112,6 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
           action={{
             label: "Reload Page",
             onClick: () => window.location.reload(),
-          }}
-        />
-      </div>
-    );
-  }
-
-  // Empty state - no repos connected
-  if (!repos || repos.length === 0) {
-    return (
-      <div className="container mx-auto max-w-7xl px-4 py-12">
-        <EmptyState
-          icon={<Github className="h-10 w-10" />}
-          title="No repositories connected"
-          description="Connect your GitHub account to start analyzing commits and generating blog posts"
-          action={{
-            label: "Connect GitHub",
-            onClick: () => {
-              window.location.href = "/settings";
-            },
           }}
         />
       </div>
@@ -176,19 +147,7 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredCommits.map((commit) => {
-            const repository = reposMap.get(commit.repoId);
-            if (!repository) return null;
-
-            return (
-              <MasonryView
-                key={commit._id}
-                commit={commit}
-                repository={repository}
-                selected={selectedCommits.has(commit._id)}
-                onSelect={handleSelectCommit}
-                onClick={() => handleCommitClick(commit)}
-              />
-            );
+            return <MasonryView key={commit._id} commit={commit} selected={selectedCommits.has(commit._id)} onSelect={handleSelectCommit} onClick={() => handleCommitClick(commit)} />;
           })}
         </div>
       )}
@@ -200,12 +159,7 @@ export function DashboardPage({ repos }: { repos: Repository[] }) {
       <BlogGenerationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} selectedCommitCount={selectedCommits.size} onSubmit={handleSubmitBlogGeneration} />
 
       {/* Commit Summary Modal */}
-      <CommitSummaryModal
-        commit={selectedCommitForSummary?.commit || null}
-        repository={selectedCommitForSummary?.repository || null}
-        isOpen={!!selectedCommitForSummary}
-        onClose={() => setSelectedCommitForSummary(null)}
-      />
+      <CommitSummaryModal commit={selectedCommitForSummary} isOpen={!!selectedCommitForSummary} onClose={() => setSelectedCommitForSummary(null)} />
     </div>
   );
 }

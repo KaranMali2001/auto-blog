@@ -34,6 +34,18 @@ export const githubWebhook = httpAction(async (ctx, req) => {
       return new Response("ok", { status: 200 });
     }
 
+    if (event === "installation") {
+      const action = payload.action as string | undefined;
+
+      // Handle installation deleted (user uninstalled the app from GitHub)
+      if (action === "deleted") {
+        await ctx.runMutation(internal.schema.user.handleInstallationDeleted, {
+          installationId: payload.installation.id,
+        });
+        return new Response("ok", { status: 200 });
+      }
+    }
+
     if (event === "installation_repositories") {
       // Handle added repositories
       if (payload.action === "added" && payload.repositories_added && payload.repositories_added.length > 0) {

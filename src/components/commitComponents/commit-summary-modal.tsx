@@ -1,27 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatRelativeTime } from "@/lib/utils";
-import type { Commit, Repository } from "@/types/index";
+import type { Commit } from "@/types/index";
 import { Calendar, ExternalLink, FileCode, FolderGit2, Sparkles, User } from "lucide-react";
 import Link from "next/link";
 
 interface CommitSummaryModalProps {
   commit: Commit | null;
-  repository: Repository | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function CommitSummaryModal({ commit, repository, isOpen, onClose }: CommitSummaryModalProps) {
-  if (!commit || !repository) return null;
+export function CommitSummaryModal({ commit, isOpen, onClose }: CommitSummaryModalProps) {
+  if (!commit) return null;
+
+  // Extract repository name from URL (e.g., "https://github.com/owner/repo" -> "owner/repo")
+  const repoName = commit.commitRepositoryUrl.split("/").slice(-2).join("/");
 
   const shortSha = commit.commitSha?.slice(0, 7) || "unknown";
   const hasBeenUsed = commit.usedInBlogs && commit.usedInBlogs.length > 0;
@@ -37,10 +33,10 @@ export function CommitSummaryModal({ commit, repository, isOpen, onClose }: Comm
           <div className="flex items-center gap-3 text-sm mb-3">
             <div className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1 text-primary font-medium">
               <FolderGit2 className="h-3.5 w-3.5" />
-              {repository.name}
+              {repoName}
             </div>
             <Link
-              href={`${repository.repoUrl}/commit/${commit.commitSha}`}
+              href={`${commit.commitRepositoryUrl}/commit/${commit.commitSha}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 font-mono text-muted-foreground hover:text-primary transition-colors"
@@ -59,16 +55,14 @@ export function CommitSummaryModal({ commit, repository, isOpen, onClose }: Comm
             </div>
             {hasBeenUsed && (
               <div className="inline-flex items-center gap-1 rounded-md bg-green-500/10 px-2.5 py-1 text-xs font-medium text-green-700 dark:text-green-300 ml-auto">
-                Used in {commit.usedInBlogs?.length} blog{commit.usedInBlogs?.length !== 1 && 's'}
+                Used in {commit.usedInBlogs?.length} blog{commit.usedInBlogs?.length !== 1 && "s"}
               </div>
             )}
           </div>
 
           {/* Commit Message - Scrollable with max height */}
           <div className="max-h-24 overflow-y-auto rounded-md bg-muted/50 px-3 py-2 border border-border/50">
-            <p className="text-sm font-medium leading-relaxed text-foreground">
-              {commit.commitMessage}
-            </p>
+            <p className="text-sm font-medium leading-relaxed text-foreground">{commit.commitMessage}</p>
           </div>
         </DialogHeader>
 
@@ -90,9 +84,7 @@ export function CommitSummaryModal({ commit, repository, isOpen, onClose }: Comm
               <div className="p-6">
                 <div className="rounded-lg bg-muted/30 p-5 border border-border/50">
                   <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
-                      {commit.summarizedCommitDiff}
-                    </div>
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{commit.summarizedCommitDiff}</div>
                   </div>
                 </div>
               </div>
@@ -103,9 +95,7 @@ export function CommitSummaryModal({ commit, repository, isOpen, onClose }: Comm
                 <Sparkles className="h-8 w-8 text-muted-foreground" />
               </div>
               <h3 className="text-base font-semibold text-foreground mb-2">No AI Summary Available</h3>
-              <p className="text-sm text-muted-foreground max-w-sm">
-                This commit hasn't been analyzed yet. The summary will appear here once it's generated.
-              </p>
+              <p className="text-sm text-muted-foreground max-w-sm">This commit hasn't been analyzed yet. The summary will appear here once it's generated.</p>
             </div>
           )}
         </div>
@@ -115,11 +105,7 @@ export function CommitSummaryModal({ commit, repository, isOpen, onClose }: Comm
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-          <Link
-            href={`${repository.repoUrl}/commit/${commit.commitSha}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <Link href={`${commit.commitRepositoryUrl}/commit/${commit.commitSha}`} target="_blank" rel="noopener noreferrer">
             <Button className="gap-2">
               <ExternalLink className="h-4 w-4" />
               View on GitHub

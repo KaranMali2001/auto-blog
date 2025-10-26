@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "@radix-ui/react-icons"],
+    optimizePackageImports: ["lucide-react", "framer-motion", "@radix-ui/react-icons", "@clerk/nextjs"],
     webpackMemoryOptimizations: true,
   },
 };

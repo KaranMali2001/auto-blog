@@ -23,23 +23,20 @@ export const getCommitDiffAction = internalAction({
       if (!owner || !repo) {
         throw new Error(`Invalid github_url: ${args.github_url}`);
       }
-      const { commit, filesChanged, stats, filteredDiff } = await ctx.runAction(
-        internal.action_helpers.github.getCommitData,
-        {
-          installationId: args.installationId,
-          commitSha: args.commitSha,
-          owner,
-          repo,
-        },
-      );
+      const { commit, filesChanged, stats, filteredDiff } = await ctx.runAction(internal.action_helpers.github.getCommitData, {
+        installationId: args.installationId,
+        commitSha: args.commitSha,
+        owner,
+        repo,
+      });
       const user = await ctx.runQuery(internal.schema.user.getUserByinstallationId, {
         installationId: args.installationId,
       });
-      const repoid = await ctx.runQuery(internal.schema.repo.getRepoByInstallation, {
+      const repos = await ctx.runQuery(internal.schema.repo.getRepoByInstallation, {
         installationId: args.installationId,
-        repoUrl: args.github_url,
+        repoUrl: [args.github_url],
       });
-      if (!repoid) {
+      if (!repos || repos.length === 0) {
         throw new Error("Repo not found");
       }
       const newCommit = await ctx.runMutation(internal.schema.commit.createCommit, {
@@ -47,7 +44,7 @@ export const getCommitDiffAction = internalAction({
         commitMessage: commit.commit.message,
         commitRepositoryUrl: args.github_url,
         commitAuthor: commit.commit.author?.name || "Unknown",
-        repoId: repoid._id,
+        repoId: repos[0]._id,
         userId: user._id,
       });
 
@@ -107,7 +104,19 @@ export const getInstallationRepo = internalAction({
     const repos = await octokit.request("GET /installation/repositories", {
       installation_id: args.installationId,
     });
+    const dbRepos = await ctx.runQuery(internal.schema.repo.getRepoByInstallation, {
+      installationId: args.installationId,
+      repoUrl: repos.data.repositories.map((r) => r.html_url),
+    });
+
     for (const repo of repos.data.repositories) {
+      const exists = dbRepos?.find((r) => r.repoUrl === repo.html_url);
+
+      if (exists) {
+        console.log(`Repo already exists, skipping: ${repo.full_name}`);
+        continue;
+      }
+
       await ctx.runMutation(internal.schema.repo.createRepo, {
         name: repo.full_name,
         repoUrl: repo.html_url,

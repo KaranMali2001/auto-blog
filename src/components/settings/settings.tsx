@@ -1,13 +1,23 @@
 "use client";
 
+import { useQueryWithStatus } from "@/app/Providers";
 import { CronSection } from "@/components/settings/cron-settings";
 import { GitHubSection } from "@/components/settings/github-integration";
 import { ProfileSection } from "@/components/settings/profile-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User } from "@/types";
 import { Calendar, Github, User2 } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
+import { ErrorState } from "../ui/error-state";
+import { Spinner } from "../ui/spinner";
 
-export function SettingsPage({ user }: { user: User }) {
+export function SettingsPage() {
+  const { data: user, isPending, isError } = useQueryWithStatus(api.schema.user.getCurrentUser);
+  if (isPending) {
+    return <Spinner centered title="Loading user..." />;
+  }
+  if (isError) {
+    return <ErrorState title="Error" message="Failed to load user" />;
+  }
   return (
     <div className="container mx-auto max-w-6xl space-y-8 px-4 py-8">
       {/* Header */}

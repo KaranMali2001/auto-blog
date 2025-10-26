@@ -40,6 +40,7 @@ export const updateInstattionId = action({
       throw new Error("User not authenticated");
     }
     const user = await ctx.runQuery(internal.schema.user.getUserByClerkId, { clerkId: identity.subject });
+
     await ctx.runAction(internal.action_helpers.github.getInstallationRepo, {
       userId: user._id,
       installationId: args.installationId,
@@ -187,5 +188,49 @@ export const getInstallationUrl = authenticatedQuery({
     const appSlug = process.env.GITHUB_APP_SLUG!;
     const authUrl = `https://github.com/apps/${appSlug}/installations/new?${params.toString()}`;
     return authUrl;
+  },
+});
+
+export const disconnectGitHub = authenticatedMutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = ctx.user._id;
+    const installationId = ctx.user.installationId;
+
+    if (!installationId) {
+      throw new Error("No GitHub installation to disconnect");
+    }
+
+    // Only update installationId to null, keep all data intact
+    await ctx.db.patch(userId, {
+      installationId: undefined,
+    });
+
+    return { success: true, message: "GitHub disconnected successfully" };
+  },
+});
+
+export const handleInstallationDeleted = internalMutation({
+  args: {
+    installationId: v.number(),
+  },
+  handler: async (ctx, args) => {
+    // Find user with this installation ID
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("installationId"), args.installationId))
+      .unique();
+
+    if (!user) {
+      console.log("User not found for installation ID:", args.installationId);
+      return;
+    }
+
+    await ctx.db.patch(user._id, {
+      installationId: undefined,
+    });
+
+    console.log("Disconnected GitHub installation:", args.installationId, "for user:", user._id);
+    return { success: true };
   },
 });
