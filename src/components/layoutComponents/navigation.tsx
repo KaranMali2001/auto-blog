@@ -1,10 +1,10 @@
 "use client";
 
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { cn } from "@/lib/utils";
 import { BarChart3, FileText, LayoutDashboard, Settings, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { cn } from "@/lib/utils";
 
 const navigation = [
   {
@@ -36,12 +36,11 @@ export function Navigation() {
     <nav className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/claude" className="flex items-center gap-2 font-bold text-foreground">
+        <Link href="/dashboard" className="flex items-center gap-2 font-bold text-foreground">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Sparkles className="h-5 w-5" />
           </div>
           <span className="hidden sm:inline">Auto-Blog</span>
-          <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Claude</span>
         </Link>
 
         {/* Navigation Links */}

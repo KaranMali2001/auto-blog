@@ -20,11 +20,12 @@ import { Switch } from "@/components/ui/switch";
 import { formatCronExpression, formatDateTime } from "@/lib/utils";
 import type { UserCron } from "@/types";
 import { useMutation } from "convex/react";
-import { Calendar, Edit, History, Trash2 } from "lucide-react";
+import { Calendar, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { CreateCronModal } from "./create-cron-modal";
+import { CronHistoryModal } from "./cron-history-modal";
 
 // Cron Section
 export function CronSection() {
@@ -45,6 +46,7 @@ export function CronSection() {
     return <Spinner centered title="Loading repositories..." />;
   }
   const userCrons = userCronsWithHistory?.userCrons ?? [];
+  const cronHistories = userCronsWithHistory?.cronHistories ?? [];
 
   const handleToggle = async (cron: UserCron, currentStatus: "enabled" | "disabled") => {
     try {
@@ -137,9 +139,7 @@ export function CronSection() {
                   <Button variant="ghost" size="icon">
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon">
-                    <History className="h-4 w-4" />
-                  </Button>
+                  <CronHistoryModal cronId={cron._id} cronExpression={cron.cronExpression} cronHistories={cronHistories} />
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" className="text-destructive">

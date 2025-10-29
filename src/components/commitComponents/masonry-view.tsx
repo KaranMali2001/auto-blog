@@ -1,10 +1,10 @@
 "use client";
 
-import { ExternalLink, GitCommit, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import type { Commit } from "@/types/index";
+import { ExternalLink, GitCommit, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 interface MasonryViewProps {
   commit: Commit;
@@ -21,7 +21,6 @@ export function MasonryView({ commit, selected = false, onSelect, onClick }: Mas
     }
   };
 
-  // Extract repository name from URL (e.g., "https://github.com/owner/repo" -> "owner/repo")
   const repoName = commit.commitRepositoryUrl.split("/").slice(-2).join("/");
   const shortSha = commit.commitSha?.slice(0, 7) || "unknown";
   const hasBeenUsed = commit.usedInBlogs && commit.usedInBlogs.length > 0;

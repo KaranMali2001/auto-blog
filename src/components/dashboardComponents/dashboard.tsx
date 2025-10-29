@@ -1,19 +1,20 @@
 "use client";
 
-import { useMutation } from "convex/react";
-import { Github, Search } from "lucide-react";
-import * as React from "react";
-import { toast } from "sonner";
 import { useQueryWithStatus } from "@/app/Providers";
 import { BlogGenerationModal } from "@/components/blogComponents/blog-generation-modal";
-import { CommitSummaryModal } from "@/components/commitComponents/commit-summary-modal";
 import { MasonryView } from "@/components/commitComponents/masonry-view";
-import { FloatingActionBar } from "@/components/floating-action-bar";
+import { FloatingActionBar } from "@/components/layoutComponents/floating-action-bar";
+import { PageHeader } from "@/components/layoutComponents/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import type { BlogGenerationFormData, Commit } from "@/types/index";
+import { useMutation } from "convex/react";
+import { Github, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
@@ -21,8 +22,7 @@ export function DashboardPage() {
   const [selectedCommits, setSelectedCommits] = React.useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [selectedCommitForSummary, setSelectedCommitForSummary] = React.useState<Commit | null>(null);
-
+  const router = useRouter();
   const { data: commits, isPending: isCommitsPending, error: commitsError } = useQueryWithStatus(api.schema.commit.getCommits);
 
   // Mutation for generating blog
@@ -72,7 +72,7 @@ export function DashboardPage() {
     try {
       const commitIds = Array.from(selectedCommits) as Id<"commits">[];
 
-      await generateBlog({
+      const blogId = await generateBlog({
         commitIds,
         platform: data.platform,
         title: data.title,
@@ -83,6 +83,9 @@ export function DashboardPage() {
       });
 
       toast.success("Blog generation started!");
+      setTimeout(() => {
+        router.push(`/blogs/${blogId}`);
+      }, 1000);
       handleClearSelection();
       setIsModalOpen(false);
     } catch (error) {
@@ -93,7 +96,7 @@ export function DashboardPage() {
   };
 
   const handleCommitClick = (commit: Commit) => {
-    setSelectedCommitForSummary(commit);
+    router.push(`/commits/${commit._id}`);
   };
 
   // Only block on commits - repos can load progressively
@@ -129,10 +132,7 @@ export function DashboardPage() {
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Select commits to generate blog posts optimized for your audience</p>
-      </div>
+      <PageHeader title="Dashboard" description="Select commits to generate blog posts optimized for your audience" />
 
       {/* Search Bar */}
       <div className="relative">
@@ -156,9 +156,6 @@ export function DashboardPage() {
 
       {/* Blog Generation Modal */}
       <BlogGenerationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} selectedCommitCount={selectedCommits.size} onSubmit={handleSubmitBlogGeneration} />
-
-      {/* Commit Summary Modal */}
-      <CommitSummaryModal commit={selectedCommitForSummary} isOpen={!!selectedCommitForSummary} onClose={() => setSelectedCommitForSummary(null)} />
     </div>
   );
 }

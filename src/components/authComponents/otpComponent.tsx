@@ -1,11 +1,11 @@
 "use client";
 
+import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 
 export function OtpComponent({ strategy }: { strategy: string }) {
   const { signIn, setActive: setSignInActive } = useSignIn();
@@ -26,7 +26,7 @@ export function OtpComponent({ strategy }: { strategy: string }) {
           strategy: "email_code",
           code: otp,
         });
-        if (result.status === "complete") {
+        if (result?.status === "complete") {
           await setSignInActive?.({ session: result.createdSessionId });
           router.push("/dashboard");
         }

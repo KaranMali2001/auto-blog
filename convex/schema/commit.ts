@@ -69,7 +69,18 @@ export const getCommits = authenticatedQuery({
       .order("desc")
       .collect();
 
-    return commits;
+    return commits.map(({ summarizedCommitDiff, ...rest }) => rest);
+  },
+});
+
+export const getCommitById = authenticatedQuery({
+  args: { commitId: v.id("commits") },
+  handler: async (ctx, args) => {
+    const commit = await ctx.db.get(args.commitId);
+    if (!commit || commit.userId !== ctx.user._id) {
+      throw new Error("Commit not found");
+    }
+    return commit;
   },
 });
 export const deleteCommit = authenticatedMutation({
@@ -127,21 +138,5 @@ export const regenerateSummary = authenticatedMutation({
     return {
       message: "Regenerating summary...",
     };
-  },
-});
-
-export const getCommitsByIds = authenticatedQuery({
-  args: { commitIds: v.array(v.id("commits")) },
-  handler: async (ctx, args) => {
-    const commits = await Promise.all(
-      args.commitIds.map(async (commitId) => {
-        const commit = await ctx.db.get(commitId);
-        if (!commit || commit.userId !== ctx.user._id) {
-          return null;
-        }
-        return commit;
-      }),
-    );
-    return commits.filter((commit): commit is NonNullable<typeof commit> => commit !== null);
   },
 });

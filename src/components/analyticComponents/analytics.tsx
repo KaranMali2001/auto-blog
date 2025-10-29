@@ -1,11 +1,12 @@
 "use client";
 
-import { FileText, FolderGit2, GitCommit, Linkedin, TrendingUp, Twitter } from "lucide-react";
-import { useMemo } from "react";
+import { PageHeader } from "@/components/layoutComponents/page-header";
 import { StatsCard } from "@/components/stats-card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { Blog, stats } from "@/types/index";
+import { FileText, FolderGit2, GitCommit, Linkedin, TrendingUp, Twitter } from "lucide-react";
+import { useMemo } from "react";
 
 export function AnalyticsPage({ blogs, stats }: { blogs: Blog[]; stats: stats }) {
   // Calculate analytics
@@ -54,10 +55,7 @@ export function AnalyticsPage({ blogs, stats }: { blogs: Blog[]; stats: stats })
   return (
     <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">Analytics</h1>
-        <p className="text-muted-foreground">Track your blog generation and engagement metrics</p>
-      </div>
+      <PageHeader title="Analytics" description="Track your blog generation and engagement metrics" />
 
       {/* Primary Stats */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

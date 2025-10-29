@@ -66,6 +66,7 @@ export const regenerateSummary = internalAction({
     const response = result.response;
     const text = response.text();
     console.log("Time taken to regenerate Summary:", Date.now() - start);
+
     return text;
   },
 });

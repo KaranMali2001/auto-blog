@@ -1,11 +1,12 @@
 "use client";
 
-import { Calendar, Github, User2 } from "lucide-react";
 import { useQueryWithStatus } from "@/app/Providers";
-import { CronSection } from "@/components/settings/cron-settings";
-import { GitHubSection } from "@/components/settings/github-integration";
-import { ProfileSection } from "@/components/settings/profile-section";
+import { PageHeader } from "@/components/layoutComponents/page-header";
+import { CronSection } from "@/components/settings/cronComponents/cron-settings";
+import { GitHubSection } from "@/components/settings/githubComponents/github-integration";
+import { ProfileSection } from "@/components/settings/profileComponents/profile-section";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Github, User2 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { ErrorState } from "../ui/error-state";
 import { Spinner } from "../ui/spinner";
@@ -21,10 +22,7 @@ export function SettingsPage() {
   return (
     <div className="container mx-auto max-w-6xl space-y-8 px-4 py-8">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">Settings</h1>
-        <p className="text-muted-foreground">Manage your profile, integrations, and automation</p>
-      </div>
+      <PageHeader title="Settings" description="Manage your profile, integrations, and automation" />
 
       {/* Tabs */}
       <Tabs defaultValue="profile" className="w-full">

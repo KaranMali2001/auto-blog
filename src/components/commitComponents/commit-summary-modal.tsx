@@ -1,11 +1,16 @@
 "use client";
 
-import { Calendar, ExternalLink, FileCode, FolderGit2, Sparkles, User } from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Commit } from "@/types/index";
+import { useMutation } from "convex/react";
+import { Calendar, ExternalLink, FileCode, FolderGit2, RefreshCw, Sparkles, User } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
+import { api } from "../../../convex/_generated/api";
 
 interface CommitSummaryModalProps {
   commit: Commit | null;
@@ -14,13 +19,42 @@ interface CommitSummaryModalProps {
 }
 
 export function CommitSummaryModal({ commit, isOpen, onClose }: CommitSummaryModalProps) {
+  const [userInput, setUserInput] = useState("");
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const regenerateSummary = useMutation(api.schema.commit.regenerateSummary);
+
   if (!commit) return null;
 
-  // Extract repository name from URL (e.g., "https://github.com/owner/repo" -> "owner/repo")
   const repoName = commit.commitRepositoryUrl.split("/").slice(-2).join("/");
 
   const shortSha = commit.commitSha?.slice(0, 7) || "unknown";
   const hasBeenUsed = commit.usedInBlogs && commit.usedInBlogs.length > 0;
+
+  const handleRegenerate = async () => {
+    if (!userInput.trim()) {
+      toast.error("Please provide instructions for regeneration");
+      return;
+    }
+
+    try {
+      setIsRegenerating(true);
+      await regenerateSummary({
+        commitId: commit._id,
+        userInput: userInput.trim(),
+      });
+      toast.success("Regenerating summary... This may take a moment.");
+      setUserInput("");
+      // Close the modal after a short delay
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (error) {
+      console.error("Failed to regenerate summary:", error);
+      toast.error("Failed to regenerate summary. Please try again.");
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -81,11 +115,40 @@ export function CommitSummaryModal({ commit, isOpen, onClose }: CommitSummaryMod
               </div>
 
               {/* Summary Content */}
-              <div className="p-6">
+              <div className="p-6 space-y-6">
                 <div className="rounded-lg bg-muted/30 p-5 border border-border/50">
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{commit.summarizedCommitDiff}</div>
                   </div>
+                </div>
+
+                {/* Regenerate Section */}
+                <div className="rounded-lg bg-card border border-border p-4 space-y-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                    <h4 className="text-sm font-semibold text-foreground">Regenerate Summary</h4>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Provide specific instructions to improve or modify the summary</p>
+                  <Textarea
+                    placeholder="E.g., Make it more technical, focus on the security implications, add more code examples..."
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    className="min-h-[80px] text-sm"
+                    disabled={isRegenerating}
+                  />
+                  <Button onClick={handleRegenerate} disabled={isRegenerating || !userInput.trim()} size="sm" className="w-full">
+                    {isRegenerating ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Regenerating...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Regenerate Summary
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>

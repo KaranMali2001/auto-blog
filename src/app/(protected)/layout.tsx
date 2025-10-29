@@ -1,4 +1,4 @@
-import { Navigation } from "@/components/navigation";
+import { Navigation } from "@/components/layoutComponents/navigation";
 import { Providers } from "../Providers";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
