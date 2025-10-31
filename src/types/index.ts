@@ -34,6 +34,8 @@ export interface Commit {
   commitAuthor?: string;
   commitRepositoryUrl: string;
   summarizedCommitDiff?: string;
+  previousSummary?: string;
+  lastRegeneratedAt?: number;
   repoId: Id<"repos">;
   userId: Id<"users">;
   usedInBlogs?: Id<"blogs">[];

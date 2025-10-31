@@ -10,6 +10,8 @@ export const commitSchema = defineTable({
   summarizedCommitDiff: v.optional(v.string()),
   commitMessage: v.string(),
   commitAuthor: v.optional(v.string()),
+  previousSummary: v.optional(v.string()),
+  lastRegeneratedAt: v.optional(v.number()),
   commitRepositoryUrl: v.string(),
   repoId: v.id("repos"),
   userId: v.id("users"),
@@ -44,11 +46,13 @@ export const updateCommit = internalMutation({
     if (!oldCommit) {
       throw new Error("Commit not found");
     }
-
+    console.log("oldCommit", oldCommit);
     await ctx.db.patch(args.commitId, {
+      previousSummary: oldCommit.summarizedCommitDiff,
       summarizedCommitDiff: args.summarizedCommitDiff,
+      lastRegeneratedAt: Date.now(),
     });
-
+    console.log(await ctx.db.get(args.commitId));
     const updatedCommit = await ctx.db.get(args.commitId);
     if (!updatedCommit) {
       throw new Error("Failed to retrieve updated commit");

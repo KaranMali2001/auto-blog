@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { DiffViewer } from "./diff-viewer";
 
 interface CommitDetailPageProps {
   commitId: string;
@@ -84,6 +85,12 @@ export function CommitDetailPage({ commitId }: CommitDetailPageProps) {
 
   const repoName = commit.commitRepositoryUrl.split("/").slice(-2).join("/");
   const shortSha = commit.commitSha?.slice(0, 7) || "unknown";
+
+  // Check if commit was regenerated less than 1 minute ago
+  const isNewlyRegenerated =
+    commit.lastRegeneratedAt &&
+    Date.now() - commit.lastRegeneratedAt < 60000 && // 1 minute = 60000 ms
+    commit.previousSummary;
 
   return (
     <div className="container mx-auto max-w-5xl space-y-6 px-4 py-8">
@@ -173,6 +180,11 @@ export function CommitDetailPage({ commitId }: CommitDetailPageProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Diff Viewer - Show if newly regenerated */}
+      {isNewlyRegenerated && commit.previousSummary && commit.summarizedCommitDiff && (
+        <DiffViewer oldString={commit.previousSummary} newString={commit.summarizedCommitDiff} title="Recent Summary Changes" />
+      )}
 
       {/* AI Summary Card */}
       <Card>
