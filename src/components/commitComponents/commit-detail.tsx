@@ -11,7 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { formatRelativeTime } from "@/lib/utils";
 import { useMutation } from "convex/react";
-import { Calendar, ExternalLink, FileCode, FolderGit2, RefreshCw, Sparkles, User } from "lucide-react";
+import { Calendar, Edit3, ExternalLink, FileCode, FolderGit2, RefreshCw, Save, Sparkles, User, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,6 +19,9 @@ import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { DiffViewer } from "./diff-viewer";
+import { ViewSelector } from "./view-selector";
+import { ArticleView } from "./viewers/article-view";
+import { MarkdownTextView } from "./viewers/markdown-text-view";
 
 interface CommitDetailPageProps {
   commitId: string;
@@ -28,6 +31,10 @@ export function CommitDetailPage({ commitId }: CommitDetailPageProps) {
   const [userInput, setUserInput] = useState("");
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<"markdown" | "article">("markdown");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedSummary, setEditedSummary] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
   const {
@@ -38,6 +45,39 @@ export function CommitDetailPage({ commitId }: CommitDetailPageProps) {
     commitId: commitId as Id<"commits">,
   });
   const regenerateSummary = useMutation(api.schema.commit.regenerateSummary);
+  const updateSummary = useMutation(api.schema.commit.updateSummary);
+
+  const handleEdit = () => {
+    if (commit?.summarizedCommitDiff) {
+      setEditedSummary(commit.summarizedCommitDiff);
+      setIsEditing(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditedSummary("");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editedSummary.trim() || !commit) return;
+
+    try {
+      setIsSaving(true);
+      await updateSummary({
+        commitId: commit._id,
+        summarizedCommitDiff: editedSummary.trim(),
+      });
+      toast.success("Summary updated successfully!");
+      setIsEditing(false);
+      setEditedSummary("");
+    } catch (error) {
+      console.error("Failed to update summary:", error);
+      toast.error("Failed to update summary. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleRegenerate = async () => {
     if (!userInput.trim()) {
@@ -172,11 +212,6 @@ export function CommitDetailPage({ commitId }: CommitDetailPageProps) {
                 </Dialog>
               )}
             </div>
-
-            {/* Commit Message in Box */}
-            <div className="rounded-md bg-background px-3 py-2 border border-border">
-              <p className="text-sm leading-relaxed text-foreground">{commit.commitMessage}</p>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -190,21 +225,50 @@ export function CommitDetailPage({ commitId }: CommitDetailPageProps) {
       <Card>
         <CardContent className="px-3 py-0">
           {commit.summarizedCommitDiff ? (
-            <div className="space-y-2">
-              {/* AI Summary Header */}
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
-                  <Sparkles className="h-4 w-4 text-blue-500" />
+            <div className="space-y-4">
+              {/* AI Summary Header with View Selector */}
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
+                    <Sparkles className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground">AI Generated Summary</h3>
                 </div>
-                <h3 className="text-base font-semibold text-foreground">AI Generated Summary</h3>
+
+                {/* View Selector or Edit Button */}
+                {!isEditing && (
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={handleEdit}>
+                      <Edit3 className="h-4 w-4" />
+                      Edit
+                    </Button>
+                    <ViewSelector currentView={currentView} onViewChange={setCurrentView} />
+                  </div>
+                )}
               </div>
 
-              {/* Summary Content */}
-              <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{commit.summarizedCommitDiff}</div>
-                </div>
+              {/* Commit Message */}
+              <div className="rounded-md bg-background px-3 py-2 border border-border">
+                <p className="text-sm leading-relaxed text-foreground">{commit.commitMessage}</p>
               </div>
+
+              {/* Summary Content with View Renderer or Edit Mode */}
+              {isEditing ? (
+                <div className="rounded-lg border border-border/50">
+                  <Textarea
+                    value={editedSummary}
+                    onChange={(e) => setEditedSummary(e.target.value)}
+                    className="min-h-[400px] font-mono text-sm"
+                    placeholder="Edit your summary here..."
+                    disabled={isSaving}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-lg bg-muted/30 p-4 border border-border/50">
+                  {currentView === "markdown" && <MarkdownTextView content={commit.summarizedCommitDiff} />}
+                  {currentView === "article" && <ArticleView content={commit.summarizedCommitDiff} />}
+                </div>
+              )}
 
               {/* GitHub Link */}
               <div className="flex justify-end">
@@ -225,6 +289,47 @@ export function CommitDetailPage({ commitId }: CommitDetailPageProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Floating Action Bar for Edit Mode */}
+      {isEditing && (
+        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 transition-all duration-300">
+          <div className="animate-in fade-in slide-in-from-bottom-2 rounded-full border border-border bg-card shadow-2xl backdrop-blur-sm">
+            <div className="flex items-center gap-4 px-6 py-4">
+              {/* Editing Indicator */}
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                  <Edit3 className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-sm font-medium text-card-foreground">Editing Summary</span>
+              </div>
+
+              {/* Divider */}
+              <div className="h-6 w-px bg-border" />
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={handleCancelEdit} disabled={isSaving}>
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+                <Button variant="primary" size="lg" onClick={handleSaveEdit} disabled={isSaving || !editedSummary.trim()}>
+                  {isSaving ? (
+                    <>
+                      <Save className="h-4 w-4 animate-pulse" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

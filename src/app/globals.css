@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "highlight.js/styles/github.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -305,4 +306,35 @@ body {
 .group\/compact-sidebar[data-state="collapsed"]:hover .sidebar-text {
   opacity: 1;
   transition: opacity 200ms ease-in-out 100ms;
+}
+
+/* Dark mode code highlight overrides */
+.dark .hljs {
+  background: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .hljs-comment,
+.dark .hljs-quote {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .hljs-keyword,
+.dark .hljs-selector-tag {
+  color: hsl(var(--primary)) !important;
+}
+
+.dark .hljs-string,
+.dark .hljs-attribute {
+  color: rgb(34, 197, 94) !important;
+}
+
+.dark .hljs-function,
+.dark .hljs-title {
+  color: rgb(251, 146, 60) !important;
+}
+
+.dark .hljs-number,
+.dark .hljs-literal {
+  color: rgb(147, 51, 234) !important;
 }
