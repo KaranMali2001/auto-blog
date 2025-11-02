@@ -4,7 +4,6 @@ import { internalAction } from "../_generated/server";
 import { genAI, MODEL } from "../config/gemini";
 import { buildLinkedInPrompt, buildTwitterPrompt } from "../config/promptHelpers";
 import { generateLinkedInPostPrompt, generateTwitterPostPrompt, regenerateSummaryWithUserInput } from "../config/prompts";
-
 export const getSummary = internalAction({
   args: {
     commitMessage: v.string(),
@@ -31,7 +30,10 @@ export const getSummary = internalAction({
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
     const text = response.text();
-
+    console.log("Prompt tokens used", response.usageMetadata?.promptTokenCount);
+    console.log("Completion tokens used", response.usageMetadata?.totalTokenCount);
+    console.log("cached tokens used", response.usageMetadata?.cachedContentTokenCount);
+    console.log("candidate tokens used", response.usageMetadata?.candidatesTokenCount);
     console.log("Time taken:", Date.now() - start);
 
     return text;
@@ -65,6 +67,10 @@ export const regenerateSummary = internalAction({
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
     const text = response.text();
+    console.log("Prompt tokens used for regenerate Summary", response.usageMetadata?.promptTokenCount);
+    console.log("Completion tokens used for regenerate Summary", response.usageMetadata?.totalTokenCount);
+    console.log("cached tokens used for regenerate Summary", response.usageMetadata?.cachedContentTokenCount);
+    console.log("candidate tokens used for regenerate Summary", response.usageMetadata?.candidatesTokenCount);
     console.log("Time taken to regenerate Summary:", Date.now() - start);
 
     return text;
@@ -103,6 +109,8 @@ export const generateBlog = internalAction({
     if (unSummarizedCommits.length > 0) {
       throw new Error("Some commits are not summarized yet");
     }
+    //flaten the commit object and then encode the commit message and summarized commit diff
+
     let fullPrompt: string;
     if (args.platform === "linkedin") {
       fullPrompt = buildLinkedInPrompt(generateLinkedInPostPrompt, args.commits, options);
@@ -121,7 +129,10 @@ export const generateBlog = internalAction({
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
     const text = response.text();
-
+    console.log("Prompt tokens used for blog generation", response.usageMetadata?.promptTokenCount);
+    console.log("Completion tokens used for blog generation", response.usageMetadata?.totalTokenCount);
+    console.log("cached tokens used for blog generation", response.usageMetadata?.cachedContentTokenCount);
+    console.log("candidate tokens used for blog generation", response.usageMetadata?.candidatesTokenCount);
     console.log(`Time taken to generate ${args.platform} post:`, Date.now() - start);
 
     // Parse and return the JSON response

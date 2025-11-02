@@ -1,10 +1,10 @@
 "use client";
 
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
-import { BarChart3, FileText, LayoutDashboard, Settings, Sparkles } from "lucide-react";
+import { BarChart3, FileText, LayoutDashboard, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserMenu } from "./user-menu";
 
 const navigation = [
   {
@@ -21,11 +21,6 @@ const navigation = [
     name: "Analytics",
     href: "/analytics",
     icon: BarChart3,
-  },
-  {
-    name: "Settings",
-    href: "/settings",
-    icon: Settings,
   },
 ];
 
@@ -64,8 +59,8 @@ export function Navigation() {
             })}
           </div>
 
-          {/* Theme Toggle */}
-          <ThemeToggle />
+          {/* User Menu */}
+          <UserMenu />
         </div>
       </div>
 
