@@ -5,7 +5,7 @@ import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function OtpComponent({ strategy }: { strategy: string }) {
   const { signIn, setActive: setSignInActive } = useSignIn();
@@ -14,6 +14,12 @@ export function OtpComponent({ strategy }: { strategy: string }) {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove("light", "system");
+    root.classList.add("dark");
+  }, []);
 
   const handleOtpVerification = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,21 +61,33 @@ export function OtpComponent({ strategy }: { strategy: string }) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-xl">
+    <div className="flex items-center justify-center min-h-screen w-full relative bg-black">
+      {/* Pearl Mist Background with Top Glow */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          background: "radial-gradient(ellipse 50% 35% at 50% 0%, rgba(226, 232, 240, 0.12), transparent 60%), #000000",
+        }}
+      />
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-md p-8 space-y-8 bg-background/80 backdrop-blur-sm border border-border/50 rounded-lg shadow-xl"
+      >
         <div className="flex items-center gap-4">
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleGoBack} className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleGoBack} className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </motion.button>
-          <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-3xl font-bold text-gray-800">
+          <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-3xl font-bold text-foreground">
             Verify Your Account
           </motion.h2>
         </div>
 
-        <p className="text-center text-gray-600">We&apos;ve sent a 6-digit verification code to your email. Please enter the code below to confirm your account.</p>
+        <p className="text-center text-muted-foreground">We&apos;ve sent a 6-digit verification code to your email. Please enter the code below to confirm your account.</p>
 
         {error && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 text-sm text-red-500 bg-red-100 border border-red-400 rounded-md">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 text-sm text-red-400 bg-red-950/50 border border-red-800/50 rounded-md">
             {error}
           </motion.div>
         )}
@@ -96,14 +114,14 @@ export function OtpComponent({ strategy }: { strategy: string }) {
             whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={otp.length !== 6 || isVerifying}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-gradient-to-b from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             {isVerifying ? "Verifying..." : "Verify Code"}
           </motion.button>
         </form>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600">Didn&apos;t receive the code?</p>
+          <p className="text-sm text-muted-foreground">Didn&apos;t receive the code?</p>
         </div>
       </motion.div>
     </div>
