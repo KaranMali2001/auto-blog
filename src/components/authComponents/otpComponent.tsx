@@ -87,7 +87,7 @@ export function OtpComponent({ strategy }: { strategy: string }) {
         <p className="text-center text-muted-foreground">We&apos;ve sent a 6-digit verification code to your email. Please enter the code below to confirm your account.</p>
 
         {error && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 text-sm text-red-400 bg-red-950/50 border border-red-800/50 rounded-md">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 text-sm text-red-400 bg-red-950/50 border border-red-800/50 rounded-lg">
             {error}
           </motion.div>
         )}
@@ -114,7 +114,7 @@ export function OtpComponent({ strategy }: { strategy: string }) {
             whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={otp.length !== 6 || isVerifying}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-gradient-to-b from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-gradient-to-b from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             {isVerifying ? "Verifying..." : "Verify Code"}
           </motion.button>

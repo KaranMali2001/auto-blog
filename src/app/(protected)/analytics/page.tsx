@@ -1,6 +1,6 @@
+import { AnalyticsPage } from "@/components/analyticComponents/analytics";
 import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
-import { AnalyticsPage } from "@/components/analyticComponents/analytics";
 import { api } from "../../../../convex/_generated/api";
 
 export default async function Page() {
@@ -8,8 +8,8 @@ export default async function Page() {
   const token = await getToken({ template: "convex" });
   if (!token) throw new Error("User not authenticated");
 
-  const blogs = await fetchQuery(api.schema.blog.getBlogs, {}, { token });
+  const blogs = await fetchQuery(api.schema.blog.getBlogs, { paginationOpts: { numItems: 10, cursor: null } }, { token });
   const stats = await fetchQuery(api.schema.user.getUserIntegrationStats, {}, { token });
 
-  return <AnalyticsPage blogs={blogs} stats={stats} />;
+  return <AnalyticsPage blogs={blogs.page} stats={stats} />;
 }

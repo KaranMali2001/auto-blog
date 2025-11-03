@@ -1,13 +1,13 @@
 "use client";
 
+import { useQueryWithStatus } from "@/app/Providers";
+import { CommitCard } from "@/components/commitComponents/commit-card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useMutation } from "convex/react";
 import { ArrowLeft, Check, Copy, Edit, Save, Trash2, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useQueryWithStatus } from "@/app/Providers";
-import { CommitCard } from "@/components/commitComponents/commit-card";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ export function BlogDetailPage({ blogId }: BlogDetailPageProps) {
 
   // Fetch blog from Convex
   const { data: blog, isPending: isBlogPending, error: blogError } = useQueryWithStatus(api.schema.blog.getBlogById, { blogId: blogId as Id<"blogs"> });
-  const { data: commits, isPending: isCommitsPending, error: commitsError } = useQueryWithStatus(api.schema.commit.getCommits);
+  const { data: commits, isPending: isCommitsPending, error: commitsError } = useQueryWithStatus(api.schema.commit.getRelatedCommits, { blogId: blogId as Id<"blogs"> });
   const { data: repos, isPending: isReposPending, error: reposError } = useQueryWithStatus(api.schema.repo.getRepos);
 
   // Mutations

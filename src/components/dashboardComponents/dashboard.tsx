@@ -5,13 +5,14 @@ import { BlogGenerationModal } from "@/components/blogComponents/blog-generation
 import { MasonryView } from "@/components/commitComponents/masonry-view";
 import { FloatingActionBar } from "@/components/layoutComponents/floating-action-bar";
 import { PageHeader } from "@/components/layoutComponents/page-header";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import type { BlogGenerationFormData, Commit } from "@/types/index";
 import { useMutation } from "convex/react";
-import { Github, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Github, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
@@ -22,11 +23,25 @@ export function DashboardPage() {
   const [selectedCommits, setSelectedCommits] = React.useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [cursor, setCursor] = React.useState<string | null>(null);
+  const [previousCursors, setPreviousCursors] = React.useState<string[]>([]);
   const router = useRouter();
-  const { data: commits, isPending: isCommitsPending, error: commitsError } = useQueryWithStatus(api.schema.commit.getCommits);
+  const {
+    data: commitsData,
+    isPending: isCommitsPending,
+    error: commitsError,
+  } = useQueryWithStatus(api.schema.commit.getCommits, {
+    paginationOpts: {
+      cursor: cursor,
+      numItems: 9,
+    },
+  });
 
   // Mutation for generating blog
   const generateBlog = useMutation(api.schema.blog.createBlog);
+
+  // Extract commits from paginated response
+  const commits = commitsData?.page ?? [];
 
   // Filter commits based on search
   const filteredCommits = React.useMemo(() => {
@@ -99,6 +114,24 @@ export function DashboardPage() {
     router.push(`/commits/${commit._id}`);
   };
 
+  const handleNext = () => {
+    if (commitsData && !commitsData.isDone && commitsData.continueCursor) {
+      setPreviousCursors([...previousCursors, cursor || ""]);
+      setCursor(commitsData.continueCursor);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (previousCursors.length > 0) {
+      const previousCursor = previousCursors[previousCursors.length - 1];
+      setCursor(previousCursor === "" ? null : previousCursor);
+      setPreviousCursors(previousCursors.slice(0, -1));
+    }
+  };
+
+  const hasNext = commitsData && !commitsData.isDone;
+  const hasPrevious = previousCursors.length > 0;
+
   // Only block on commits - repos can load progressively
   if (isCommitsPending) {
     return <Spinner centered title="Loading commits..." />;
@@ -148,6 +181,20 @@ export function DashboardPage() {
           {filteredCommits.map((commit) => {
             return <MasonryView key={commit._id} commit={commit} selected={selectedCommits.has(commit._id)} onSelect={handleSelectCommit} onClick={() => handleCommitClick(commit)} />;
           })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {(hasNext || hasPrevious) && (
+        <div className="flex items-center justify-center gap-2">
+          <Button variant="outline" size="sm" onClick={handlePrevious} disabled={!hasPrevious || isCommitsPending}>
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Previous
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleNext} disabled={!hasNext || isCommitsPending}>
+            Next
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
         </div>
       )}
 

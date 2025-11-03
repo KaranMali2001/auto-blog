@@ -1,4 +1,4 @@
-import { defineTable } from "convex/server";
+import { defineTable, paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
@@ -65,15 +65,19 @@ export const updateCommit = internalMutation({
   },
 });
 export const getCommits = authenticatedQuery({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, { paginationOpts }) => {
     const commits = await ctx.db
       .query("commits")
       .withIndex("byUserId", (q) => q.eq("userId", ctx.user._id))
       .order("desc")
-      .collect();
-
-    return commits.map(({ summarizedCommitDiff, ...rest }) => rest);
+      .paginate(paginationOpts);
+    return {
+      ...commits,
+      page: commits.page.map(({ summarizedCommitDiff, ...rest }) => rest),
+    };
   },
 });
 
@@ -142,5 +146,16 @@ export const regenerateSummary = authenticatedMutation({
     return {
       message: "Regenerating summary...",
     };
+  },
+});
+export const getRelatedCommits = authenticatedQuery({
+  args: { blogId: v.id("blogs") },
+  handler: async (ctx, args) => {
+    const blog = await ctx.db.get(args.blogId);
+    if (!blog || blog.userId !== ctx.user._id) {
+      throw new Error("Unauthorized");
+    }
+    const commitIds = blog.commitIds;
+    return (await Promise.all(commitIds.map((id) => ctx.db.get(id)))).filter((commit) => commit !== null);
   },
 });

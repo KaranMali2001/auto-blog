@@ -40,7 +40,7 @@ export default function Features() {
   return (
     <section id="features" className="text-foreground relative overflow-hidden py-12 sm:py-24 md:py-32">
       <div className="bg-primary absolute -top-10 left-1/2 h-16 w-44 -translate-x-1/2 rounded-full opacity-40 blur-3xl select-none"></div>
-      <div className="via-primary/50 absolute top-0 left-1/2 h-px w-3/5 -translate-x-1/2 bg-gradient-to-r from-transparent to-transparent transition-all ease-in-out"></div>
+      <div className="via-primary/50 absolute top-0 left-1/2 h-px w-3/5 -translate-x-1/2  from-transparent to-transparent transition-all ease-in-out"></div>
       <motion.div
         ref={ref}
         initial={{ opacity: 0, y: 50 }}
@@ -48,11 +48,7 @@ export default function Features() {
         transition={{ duration: 0.5, delay: 0 }}
         className="container mx-auto flex flex-col items-center gap-6 sm:gap-12"
       >
-        <h2
-          className={cn(
-            "via-foreground mb-8 bg-gradient-to-b from-zinc-800 to-zinc-700 bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px]",
-          )}
-        >
+        <h2 className={cn("via-foreground mb-8  from-zinc-800 to-zinc-700 bg-clip-text text-center text-4xl font-semibold tracking-tighter text-transparent md:text-[54px] md:leading-[60px]")}>
           Features
         </h2>
         <div>
@@ -166,7 +162,7 @@ export default function Features() {
 
                       {/* Center Logo */}
                       <motion.div
-                        className="w-16 h-16 border border-gray-300 rounded-lg overflow-hidden shadow-lg"
+                        className="w-16 h-16 border border-gray-300 rounded-xl overflow-hidden shadow-lg"
                         initial={{ opacity: 1, scale: 1 }}
                         animate={isCliHovering ? { scale: [1, 1.1, 1] } : { scale: 1 }}
                         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -256,13 +252,13 @@ export default function Features() {
               </div>
               <div className="flex min-h-[300px] grow items-start justify-center select-none">
                 <h1 className="mt-8 text-center text-5xl leading-[100%] font-semibold sm:leading-normal lg:mt-12 lg:text-6xl">
-                  <span className='bg-background relative mt-3 inline-block w-fit rounded-md border px-1.5 py-0.5 before:absolute before:top-0 before:left-0 before:z-10 before:h-full before:w-full before:bg-[url("/noise.gif")] before:opacity-[0.09] before:content-[""]'>
+                  <span className='bg-background relative mt-3 inline-block w-fit rounded-lg border px-1.5 py-0.5 before:absolute before:top-0 before:left-0 before:z-10 before:h-full before:w-full before:bg-[url("/noise.gif")] before:opacity-[0.09] before:content-[""]'>
                     <ScrambleHover
                       text="feature-2"
                       scrambleSpeed={70}
                       maxIterations={20}
                       useOriginalCharsOnly={false}
-                      className="cursor-pointer bg-gradient-to-t from-[#e78a53] to-[#e78a53] bg-clip-text text-transparent"
+                      className="cursor-pointer  from-[#e78a53] to-[#e78a53] bg-clip-text text-transparent"
                       isHovering={isHovering}
                       setIsHovering={setIsHovering}
                       characters="abcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;':\,./<>?"
@@ -401,7 +397,7 @@ export default function Features() {
               <div className="flex grow items-center justify-center select-none relative min-h-[300px] p-4">
                 <div className="relative w-full max-w-sm">
                   <img src="/modern-grid-layout.png" alt="Dynamic Layout Example" className="w-full h-auto rounded-lg shadow-lg" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
+                  <div className="absolute inset-0  from-black/20 to-transparent rounded-lg"></div>
                 </div>
               </div>
             </motion.div>

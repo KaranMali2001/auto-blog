@@ -1,4 +1,4 @@
-import { defineTable } from "convex/server";
+import { defineTable, paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
@@ -118,13 +118,13 @@ export const getBlogById = authenticatedQuery({
 });
 
 export const getBlogs = authenticatedQuery({
-  args: {},
-  handler: async (ctx) => {
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { paginationOpts }) => {
     return await ctx.db
       .query("blogs")
       .withIndex("byUserId", (q) => q.eq("userId", ctx.user._id))
       .order("desc")
-      .collect();
+      .paginate(paginationOpts);
   },
 });
 

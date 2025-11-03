@@ -106,7 +106,7 @@ export function FinalLanding() {
           {isSignedIn ? (
             <Link
               href="/dashboard"
-              className="rounded-md font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] px-4 py-2 text-sm"
+              className="rounded-lg font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] px-4 py-2 text-sm"
             >
               Dashboard
             </Link>
@@ -118,7 +118,7 @@ export function FinalLanding() {
 
               <Link
                 href="/sign-up"
-                className="rounded-md font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] px-4 py-2 text-sm"
+                className="rounded-lg font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] px-4 py-2 text-sm"
               >
                 Sign Up
               </Link>
@@ -153,25 +153,25 @@ export function FinalLanding() {
             <nav className="flex flex-col space-y-4">
               <button
                 onClick={() => handleMobileNavClick("features")}
-                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50"
+                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-background/50"
               >
                 Features
               </button>
               <button
                 onClick={() => handleMobileNavClick("pricing")}
-                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50"
+                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-background/50"
               >
                 Pricing
               </button>
               <button
                 onClick={() => handleMobileNavClick("testimonials")}
-                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50"
+                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-background/50"
               >
                 Testimonials
               </button>
               <button
                 onClick={() => handleMobileNavClick("faq")}
-                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50"
+                className="text-left px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-background/50"
               >
                 FAQ
               </button>
@@ -179,18 +179,18 @@ export function FinalLanding() {
                 {isSignedIn ? (
                   <Link
                     href="/dashboard"
-                    className="px-4 py-3 text-lg font-bold text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground rounded-lg shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                    className="px-4 py-3 text-lg font-bold text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground rounded-xl shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                   >
                     Dashboard
                   </Link>
                 ) : (
                   <>
-                    <Link href="/sign-in" className="px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-background/50 cursor-pointer">
+                    <Link href="/sign-in" className="px-4 py-3 text-lg font-medium text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-background/50 cursor-pointer">
                       Log In
                     </Link>
                     <Link
                       href="/sign-up"
-                      className="px-4 py-3 text-lg font-bold text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground rounded-lg shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                      className="px-4 py-3 text-lg font-bold text-center bg-gradient-to-b from-primary to-primary/80 text-primary-foreground rounded-xl shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                     >
                       Sign Up
                     </Link>
