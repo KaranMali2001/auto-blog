@@ -14,17 +14,19 @@ import type { BlogGenerationFormData, Commit } from "@/types/index";
 import { useMutation } from "convex/react";
 import { ChevronLeft, ChevronRight, Github, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import * as React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 export function DashboardPage() {
-  const [selectedCommits, setSelectedCommits] = React.useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [cursor, setCursor] = React.useState<string | null>(null);
-  const [previousCursors, setPreviousCursors] = React.useState<string[]>([]);
+  const [selectedCommits, setSelectedCommits] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [previousCursors, setPreviousCursors] = useState<string[]>([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const {
     data: commitsData,
@@ -33,18 +35,33 @@ export function DashboardPage() {
   } = useQueryWithStatus(api.schema.commit.getCommits, {
     paginationOpts: {
       cursor: cursor,
-      numItems: 9,
+      numItems: 12,
     },
   });
 
   // Mutation for generating blog
   const generateBlog = useMutation(api.schema.blog.createBlog);
 
+  // Smooth scroll to top on pagination change
+  useEffect(() => {
+    if (cursor !== null && !isCommitsPending && commitsData?.page) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      // Reset transition after scroll completes
+      const timeout = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 300);
+      return () => clearTimeout(timeout);
+    }
+  }, [cursor, commitsData?.page, isCommitsPending]);
+
   // Extract commits from paginated response
   const commits = commitsData?.page ?? [];
 
   // Filter commits based on search
-  const filteredCommits = React.useMemo(() => {
+  const filteredCommits = useMemo(() => {
     if (!commits) return [];
     if (!searchQuery.trim()) return commits;
 
@@ -116,6 +133,7 @@ export function DashboardPage() {
 
   const handleNext = () => {
     if (commitsData && !commitsData.isDone && commitsData.continueCursor) {
+      setIsTransitioning(true);
       setPreviousCursors([...previousCursors, cursor || ""]);
       setCursor(commitsData.continueCursor);
     }
@@ -123,6 +141,7 @@ export function DashboardPage() {
 
   const handlePrevious = () => {
     if (previousCursors.length > 0) {
+      setIsTransitioning(true);
       const previousCursor = previousCursors[previousCursors.length - 1];
       setCursor(previousCursor === "" ? null : previousCursor);
       setPreviousCursors(previousCursors.slice(0, -1));
@@ -174,24 +193,26 @@ export function DashboardPage() {
       </div>
 
       {/* Masonry Grid */}
-      {filteredCommits.length === 0 ? (
-        <EmptyState icon={<Search className="h-10 w-10" />} title="No commits found" description={searchQuery ? "Try adjusting your search query" : "No commits available in your repositories"} />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredCommits.map((commit) => {
-            return <MasonryView key={commit._id} commit={commit} selected={selectedCommits.has(commit._id)} onSelect={handleSelectCommit} onClick={() => handleCommitClick(commit)} />;
-          })}
-        </div>
-      )}
+      <div ref={contentRef} className={`transition-opacity duration-200 ease-in-out ${isTransitioning ? "opacity-70" : "opacity-100"}`}>
+        {filteredCommits.length === 0 ? (
+          <EmptyState icon={<Search className="h-10 w-10" />} title="No commits found" description={searchQuery ? "Try adjusting your search query" : "No commits available in your repositories"} />
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredCommits.map((commit) => {
+              return <MasonryView key={commit._id} commit={commit} selected={selectedCommits.has(commit._id)} onSelect={handleSelectCommit} onClick={() => handleCommitClick(commit)} />;
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Pagination Controls */}
       {(hasNext || hasPrevious) && (
         <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" size="sm" onClick={handlePrevious} disabled={!hasPrevious || isCommitsPending}>
+          <Button variant="outline" size="sm" onClick={handlePrevious} disabled={!hasPrevious || isCommitsPending || isTransitioning} className="transition-all duration-200 disabled:opacity-50">
             <ChevronLeft className="h-4 w-4 mr-1" />
             Previous
           </Button>
-          <Button variant="outline" size="sm" onClick={handleNext} disabled={!hasNext || isCommitsPending}>
+          <Button variant="outline" size="sm" onClick={handleNext} disabled={!hasNext || isCommitsPending || isTransitioning} className="transition-all duration-200 disabled:opacity-50">
             Next
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
