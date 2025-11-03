@@ -166,7 +166,8 @@ pnpm dev
 4. **Smart Filtering**: Filters out irrelevant files (lock files, binaries, build artifacts, files >500 lines changed)
 5. **AI Summarization**: OpenRouter LLM (Google Gemini 2.0 Flash) generates detailed, story-driven commit summaries
 6. **Data Persistence**: Commit metadata and AI-generated summaries stored in Convex
-7. **Future Aggregation**: Summaries designed to be combined into blog posts, LinkedIn updates, or Twitter threads
+7. **Content Aggregation**: Summaries automatically combined into blog posts, LinkedIn updates, or Twitter threads with customizable tone and length
+8. **Automated Scheduling**: Cron jobs enable automatic daily/weekly blog generation from recent commits
 
 ## Development
 
@@ -205,12 +206,24 @@ The application uses:
 - [x] Automated commit analysis with AI-generated summaries
 - [x] Database schemas for commits and repositories
 - [x] Installation token generation and management
+- [x] Smooth pagination transitions with scroll-to-top and fade effects
+- [x] Improved blog card layout (platform and commit count on single line)
+- [x] Blog generation modal with platform selection (Twitter/X, LinkedIn)
+- [x] Content customization (tone types: technical, business, hiring manager, custom)
+- [x] Length customization (short, medium, long)
+- [x] Blog detail page with preview and editing capabilities
+- [x] Blog deletion functionality
+- [x] Analytics dashboard with stats and breakdowns
+- [x] Settings page with profile, GitHub integration, and cron management
+- [x] Automated cron job system for scheduled blog generation
+- [x] Cron history tracking and management
 
 ### 🚧 In Progress / TODO
 
 #### High Priority
 
 - [x] **Test End-to-End Commit Analysis Flow**
+
   - [x] Verify webhook receives push events
   - [x] Test commit diff extraction
   - [x] Validate file filtering logic
@@ -219,37 +232,26 @@ The application uses:
   - [x] Test error handling and retry logic
 
 - [ ] **Content Aggregation System**
-  - [ ] Design multi-commit aggregation logic
-  - [ ] Create blog post template engine
-  - [ ] Build LinkedIn update formatter
-  - [ ] Implement Twitter thread generator
-  - [ ] Add time-based grouping (daily/weekly summaries)
+  - [x] Design multi-commit aggregation logic
+  - [x] Create blog post template engine (LinkedIn & Twitter/X formats)
+  - [x] Build LinkedIn update formatter
+  - [x] Implement Twitter thread generator
+  - [x] Add time-based grouping (automated cron jobs for daily summaries)
 
 #### Medium Priority
 
 - [ ] **Dashboard & UI**
-  - [ ] Repository selection interface
-  - [ ] Commit history viewer with AI summaries
-  - [ ] Generated content preview and editing
-  - [ ] Publishing workflow (draft → review → publish)
-  - [ ] Settings page for customization
+
+  - [x] Smooth pagination with transitions (blogs and commits pages)
+  - [x] Repository selection interface (in cron settings)
+  - [x] Commit history viewer with AI summaries (dashboard page)
+  - [x] Generated content preview and editing (blog detail page with edit mode)
+  - [ ] Publishing workflow (draft → review → publish) - content generation complete, publishing to platforms pending
+  - [x] Settings page for customization (profile, GitHub, cron schedules)
 
 - [ ] **Content Publishing**
   - [ ] Blog platform integrations (Dev.to, Medium, Hashnode)
   - [ ] LinkedIn API integration for auto-posting
   - [ ] Twitter API integration for thread publishing
-  - [ ] Manual export to Markdown
-  - [ ] Scheduling system for timed posts
-
-#### Low Priority
-
-- [ ] Advanced error handling and logging
-- [ ] Rate limiting for API endpoints
-- [ ] Monitoring and observability (Sentry, analytics)
-- [ ] Unit and integration tests
-- [ ] API documentation
-- [ ] Performance optimization and caching
-- [ ] Admin panel for user management
-- [ ] Support for multiple LLM providers
-- [ ] Custom prompt templates
-- [ ] Content tone/style customization
+  - [x] Manual export to Markdown (copy functionality in blog detail page)
+  - [x] Scheduling system for timed posts (cron job system implemented)
