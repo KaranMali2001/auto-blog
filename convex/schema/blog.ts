@@ -1,7 +1,7 @@
 import { defineTable, paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { internalMutation } from "../_generated/server";
+import { internalMutation, internalQuery } from "../_generated/server";
 import { aggregateByTotalBlogCount } from "../aggregation";
 import { authenticatedMutation, authenticatedQuery } from "../lib/auth";
 
@@ -112,6 +112,19 @@ export const getBlogById = authenticatedQuery({
     const blog = await ctx.db.get(args.blogId);
     if (!blog || blog.userId !== ctx.user._id) {
       throw new Error("Blog not found or unauthorized");
+    }
+    return blog;
+  },
+});
+
+export const getBlogByIdInternal = internalQuery({
+  args: {
+    blogId: v.id("blogs"),
+  },
+  handler: async (ctx, args) => {
+    const blog = await ctx.db.get(args.blogId);
+    if (!blog) {
+      throw new Error("Blog not found");
     }
     return blog;
   },

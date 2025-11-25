@@ -53,12 +53,13 @@ export const getCommitDiffAction = internalAction({
         id: args.id,
         status: "success",
       });
+      const promptToUse = user.customCommitPrompt && user.customCommitPrompt.trim() !== "" ? user.customCommitPrompt : singleCommitPrompt;
       const commitSummary = await ctx.runAction(internal.action_helpers.gemini.getSummary, {
         commitMessage: commit.commit.message,
         filesChanged,
         stats,
         fileContent: filteredDiff,
-        prompt: singleCommitPrompt,
+        prompt: promptToUse,
       });
       if (!commitSummary) {
         return null;

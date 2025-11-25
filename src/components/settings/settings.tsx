@@ -5,8 +5,9 @@ import { PageHeader } from "@/components/layoutComponents/page-header";
 import { CronSection } from "@/components/settings/cronComponents/cron-settings";
 import { GitHubSection } from "@/components/settings/githubComponents/github-integration";
 import { ProfileSection } from "@/components/settings/profileComponents/profile-section";
+import { PromptSettings } from "@/components/settings/promptComponents/prompt-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Github, User2 } from "lucide-react";
+import { Calendar, FileText, Github, User2 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { ErrorState } from "../ui/error-state";
 import { Spinner } from "../ui/spinner";
@@ -39,6 +40,10 @@ export function SettingsPage() {
             <Calendar className="h-4 w-4" />
             Cron Schedules
           </TabsTrigger>
+          <TabsTrigger value="prompts" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Prompts
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="mt-6">
@@ -49,6 +54,9 @@ export function SettingsPage() {
         </TabsContent>
         <TabsContent value="crons" className="mt-6">
           <CronSection />
+        </TabsContent>
+        <TabsContent value="prompts" className="mt-6">
+          <PromptSettings user={user} />
         </TabsContent>
       </Tabs>
     </div>

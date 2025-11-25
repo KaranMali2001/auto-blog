@@ -100,6 +100,22 @@ export const generateBlog = internalAction({
   handler: async (ctx, args) => {
     const start = Date.now();
 
+    // Fetch blog to get userId
+    const blog = await ctx.runQuery(internal.schema.blog.getBlogByIdInternal, {
+      blogId: args.blogId,
+    });
+    if (!blog) {
+      throw new Error("Blog not found");
+    }
+
+    // Fetch user to get custom prompts
+    const user = await ctx.runQuery(internal.schema.user.getUserById, {
+      userId: blog.userId,
+    });
+    if (!user) {
+      throw new Error("User not found");
+    }
+
     // Prepare the options with defaults
     const options = {
       toneType: args.options?.toneType || "professional",
@@ -113,9 +129,11 @@ export const generateBlog = internalAction({
 
     let fullPrompt: string;
     if (args.platform === "linkedin") {
-      fullPrompt = buildLinkedInPrompt(generateLinkedInPostPrompt, args.commits, options);
+      const customPrompt = user.customLinkedInPrompt && user.customLinkedInPrompt.trim() !== "" ? user.customLinkedInPrompt : undefined;
+      fullPrompt = buildLinkedInPrompt(generateLinkedInPostPrompt, args.commits, options, customPrompt);
     } else {
-      fullPrompt = buildTwitterPrompt(generateTwitterPostPrompt, args.commits, options);
+      const customPrompt = user.customTwitterPrompt && user.customTwitterPrompt.trim() !== "" ? user.customTwitterPrompt : undefined;
+      fullPrompt = buildTwitterPrompt(generateTwitterPostPrompt, args.commits, options, customPrompt);
     }
 
     // Configure Gemini to use JSON mode for structured output

@@ -87,6 +87,9 @@ export interface User {
   name?: string;
   imageUrl?: string;
   installationId?: number;
+  customCommitPrompt?: string;
+  customTwitterPrompt?: string;
+  customLinkedInPrompt?: string;
 }
 
 // Component Props Types

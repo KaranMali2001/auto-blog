@@ -140,12 +140,13 @@ ${commit.summarizedCommitDiff}
 /**
  * Build the complete LinkedIn post generation prompt with user data
  */
-export function buildLinkedInPrompt(promptTemplate: string, commits: CommitData[], options: PostOptions): string {
+export function buildLinkedInPrompt(promptTemplate: string, commits: CommitData[], options: PostOptions, customPromptTemplate?: string): string {
+  const templateToUse = customPromptTemplate && customPromptTemplate.trim() !== "" ? customPromptTemplate : promptTemplate;
   const lengthGuidelines = getLengthGuidelines(options.length, "linkedin");
   const toneGuidelines = getToneGuidelines(options.toneType);
   const commitSummaries = formatCommitSummaries(commits);
 
-  return promptTemplate
+  return templateToUse
     .replace("{lengthGuidelines}", lengthGuidelines)
     .replace("{toneGuidelines}", toneGuidelines)
     .replace("{commitSummaries}", commitSummaries)
@@ -156,12 +157,13 @@ export function buildLinkedInPrompt(promptTemplate: string, commits: CommitData[
 /**
  * Build the complete Twitter post generation prompt with user data
  */
-export function buildTwitterPrompt(promptTemplate: string, commits: CommitData[], options: PostOptions): string {
+export function buildTwitterPrompt(promptTemplate: string, commits: CommitData[], options: PostOptions, customPromptTemplate?: string): string {
+  const templateToUse = customPromptTemplate && customPromptTemplate.trim() !== "" ? customPromptTemplate : promptTemplate;
   const lengthGuidelines = getLengthGuidelines(options.length, "twitter");
   const toneGuidelines = getToneGuidelines(options.toneType);
   const commitSummaries = formatCommitSummaries(commits);
 
-  return promptTemplate
+  return templateToUse
     .replace("{lengthGuidelines}", lengthGuidelines)
     .replace("{toneGuidelines}", toneGuidelines)
     .replace("{commitSummaries}", commitSummaries)

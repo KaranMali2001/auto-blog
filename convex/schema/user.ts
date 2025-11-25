@@ -13,6 +13,9 @@ export const UserSchema = defineTable({
   createdAt: v.string(),
   updatedAt: v.string(),
   installationId: v.optional(v.number()),
+  customCommitPrompt: v.optional(v.string()),
+  customTwitterPrompt: v.optional(v.string()),
+  customLinkedInPrompt: v.optional(v.string()),
 }).index("byClerkId", ["clerkId"]);
 export const createUser = internalMutation({
   args: {
@@ -147,6 +150,19 @@ export const getUserByClerkId = internalQuery({
     return user;
   },
 });
+
+export const getUserById = internalQuery({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  },
+});
 export const getUserIntegrationStats = authenticatedQuery({
   args: {},
   handler: async (ctx) => {
@@ -232,5 +248,32 @@ export const handleInstallationDeleted = internalMutation({
 
     console.log("Disconnected GitHub installation:", args.installationId, "for user:", user._id);
     return { success: true };
+  },
+});
+
+export const updateCustomPrompts = authenticatedMutation({
+  args: {
+    customCommitPrompt: v.optional(v.string()),
+    customTwitterPrompt: v.optional(v.string()),
+    customLinkedInPrompt: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const updateData: {
+      customCommitPrompt?: string | undefined;
+      customTwitterPrompt?: string | undefined;
+      customLinkedInPrompt?: string | undefined;
+    } = {};
+
+    if (args.customCommitPrompt !== undefined) {
+      updateData.customCommitPrompt = args.customCommitPrompt || undefined;
+    }
+    if (args.customTwitterPrompt !== undefined) {
+      updateData.customTwitterPrompt = args.customTwitterPrompt || undefined;
+    }
+    if (args.customLinkedInPrompt !== undefined) {
+      updateData.customLinkedInPrompt = args.customLinkedInPrompt || undefined;
+    }
+
+    await ctx.db.patch(ctx.user._id, updateData);
   },
 });
