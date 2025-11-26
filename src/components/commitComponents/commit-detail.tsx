@@ -7,11 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
+import { FloatingSaveFooter } from "@/components/ui/floating-save-footer";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { formatRelativeTime } from "@/lib/utils";
 import { useMutation } from "convex/react";
-import { Calendar, Edit3, ExternalLink, FileCode, FolderGit2, RefreshCw, Save, Sparkles, User, X } from "lucide-react";
+import { Calendar, Edit3, ExternalLink, FileCode, FolderGit2, RefreshCw, Sparkles, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -291,45 +292,16 @@ export function CommitDetailPage({ commitId }: CommitDetailPageProps) {
       </Card>
 
       {/* Floating Action Bar for Edit Mode */}
-      {isEditing && (
-        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 transition-all duration-300">
-          <div className="animate-in fade-in slide-in-from-bottom-2 rounded-full border border-border bg-card shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center gap-4 px-6 py-4">
-              {/* Editing Indicator */}
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                  <Edit3 className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-sm font-medium text-card-foreground">Editing Summary</span>
-              </div>
-
-              {/* Divider */}
-              <div className="h-6 w-px bg-border" />
-
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCancelEdit} disabled={isSaving}>
-                  <X className="h-4 w-4" />
-                  Cancel
-                </Button>
-                <Button variant="primary" size="lg" onClick={handleSaveEdit} disabled={isSaving || !editedSummary.trim()}>
-                  {isSaving ? (
-                    <>
-                      <Save className="h-4 w-4 animate-pulse" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      Save Changes
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FloatingSaveFooter
+        isVisible={isEditing}
+        icon={Edit3}
+        indicatorText="Editing Summary"
+        onCancel={handleCancelEdit}
+        onSave={handleSaveEdit}
+        isSaving={isSaving}
+        isSaveDisabled={!editedSummary.trim()}
+        saveButtonSize="lg"
+      />
     </div>
   );
 }

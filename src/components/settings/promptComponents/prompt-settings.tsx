@@ -2,12 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FloatingSaveFooter } from "@/components/ui/floating-save-footer";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { User } from "@/types";
 import { useMutation } from "convex/react";
-import { FileText, Linkedin, Loader2, Save, Twitter } from "lucide-react";
-import { useEffect, useState } from "react";
+import { FileText, Linkedin, Save, Twitter } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../../../convex/_generated/api";
 
@@ -20,16 +21,40 @@ export function PromptSettings({ user }: { user: User }) {
   const [customLinkedInPrompt, setCustomLinkedInPrompt] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [initialValues, setInitialValues] = useState({
+    customCommitPrompt: "",
+    customTwitterPrompt: "",
+    customLinkedInPrompt: "",
+  });
 
   // Initialize form with user data when available
   useEffect(() => {
     if (user && !isInitialized) {
-      setCustomCommitPrompt(user.customCommitPrompt || "");
-      setCustomTwitterPrompt(user.customTwitterPrompt || "");
-      setCustomLinkedInPrompt(user.customLinkedInPrompt || "");
+      const commitPrompt = user.customCommitPrompt || "";
+      const twitterPrompt = user.customTwitterPrompt || "";
+      const linkedInPrompt = user.customLinkedInPrompt || "";
+
+      setCustomCommitPrompt(commitPrompt);
+      setCustomTwitterPrompt(twitterPrompt);
+      setCustomLinkedInPrompt(linkedInPrompt);
+      setInitialValues({
+        customCommitPrompt: commitPrompt,
+        customTwitterPrompt: twitterPrompt,
+        customLinkedInPrompt: linkedInPrompt,
+      });
       setIsInitialized(true);
     }
   }, [user, isInitialized]);
+
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    if (!isInitialized) return false;
+    return (
+      customCommitPrompt.trim() !== initialValues.customCommitPrompt.trim() ||
+      customTwitterPrompt.trim() !== initialValues.customTwitterPrompt.trim() ||
+      customLinkedInPrompt.trim() !== initialValues.customLinkedInPrompt.trim()
+    );
+  }, [customCommitPrompt, customTwitterPrompt, customLinkedInPrompt, initialValues, isInitialized]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -39,12 +64,26 @@ export function PromptSettings({ user }: { user: User }) {
         customTwitterPrompt: customTwitterPrompt.trim() || undefined,
         customLinkedInPrompt: customLinkedInPrompt.trim() || undefined,
       });
+      // Update initial values after successful save
+      setInitialValues({
+        customCommitPrompt: customCommitPrompt.trim(),
+        customTwitterPrompt: customTwitterPrompt.trim(),
+        customLinkedInPrompt: customLinkedInPrompt.trim(),
+      });
       toast.success("Custom prompts saved successfully!");
     } catch (error: any) {
       console.error("Failed to save prompts:", error);
       toast.error(error?.message || "Failed to save custom prompts");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (user) {
+      setCustomCommitPrompt(user.customCommitPrompt || "");
+      setCustomTwitterPrompt(user.customTwitterPrompt || "");
+      setCustomLinkedInPrompt(user.customLinkedInPrompt || "");
     }
   };
 
@@ -197,22 +236,8 @@ export function PromptSettings({ user }: { user: User }) {
         </CardContent>
       </Card>
 
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving} size="lg">
-          {isSaving ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4" />
-              Save Changes
-            </>
-          )}
-        </Button>
-      </div>
+      {/* Floating Action Bar for Unsaved Changes */}
+      <FloatingSaveFooter isVisible={hasUnsavedChanges} icon={Save} indicatorText="Unsaved changes" onCancel={handleCancel} onSave={handleSave} isSaving={isSaving} />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useQueryWithStatus } from "@/app/Providers";
 import { CommitCard } from "@/components/commitComponents/commit-card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useMutation } from "convex/react";
-import { ArrowLeft, Check, Copy, Edit, Save, Trash2, X } from "lucide-react";
+import { ArrowLeft, Check, Copy, Edit, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
+import { FloatingSaveFooter } from "@/components/ui/floating-save-footer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -287,36 +288,7 @@ export function BlogDetailPage({ blogId }: BlogDetailPageProps) {
       )}
 
       {/* Floating Action Bar for Edit Mode */}
-      {isEditing && (
-        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
-          <div className="rounded-full border border-border bg-card shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center gap-4 px-6 py-4">
-              {/* Edit Mode Indicator */}
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                  <Edit className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-sm font-medium text-card-foreground">Editing blog post</span>
-              </div>
-
-              {/* Divider */}
-              <div className="h-6 w-px bg-border" />
-
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCancel}>
-                  <X className="h-4 w-4" />
-                  Cancel
-                </Button>
-                <Button variant="primary" size="sm" onClick={handleSave}>
-                  <Save className="h-4 w-4" />
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FloatingSaveFooter isVisible={isEditing} icon={Edit} indicatorText="Editing blog post" onCancel={handleCancel} onSave={handleSave} />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
