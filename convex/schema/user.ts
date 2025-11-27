@@ -258,22 +258,10 @@ export const updateCustomPrompts = authenticatedMutation({
     customLinkedInPrompt: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const updateData: {
-      customCommitPrompt?: string | undefined;
-      customTwitterPrompt?: string | undefined;
-      customLinkedInPrompt?: string | undefined;
-    } = {};
-
-    if (args.customCommitPrompt !== undefined) {
-      updateData.customCommitPrompt = args.customCommitPrompt || undefined;
-    }
-    if (args.customTwitterPrompt !== undefined) {
-      updateData.customTwitterPrompt = args.customTwitterPrompt || undefined;
-    }
-    if (args.customLinkedInPrompt !== undefined) {
-      updateData.customLinkedInPrompt = args.customLinkedInPrompt || undefined;
-    }
-
-    await ctx.db.patch(ctx.user._id, updateData);
+    await ctx.db.patch(ctx.user._id, {
+      customCommitPrompt: args.customCommitPrompt,
+      customTwitterPrompt: args.customTwitterPrompt,
+      customLinkedInPrompt: args.customLinkedInPrompt,
+    });
   },
 });

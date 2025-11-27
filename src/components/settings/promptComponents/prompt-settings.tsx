@@ -87,44 +87,13 @@ export function PromptSettings({ user }: { user: User }) {
     }
   };
 
-  const handleReset = async (type: "commit" | "twitter" | "linkedin") => {
-    setIsSaving(true);
-    try {
-      if (type === "commit") {
-        setCustomCommitPrompt("");
-        await updateCustomPrompts({
-          customCommitPrompt: undefined,
-        });
-        setInitialValues((prev) => ({ ...prev, customCommitPrompt: "" }));
-      } else if (type === "twitter") {
-        setCustomTwitterPrompt("");
-        await updateCustomPrompts({
-          customTwitterPrompt: undefined,
-        });
-        setInitialValues((prev) => ({ ...prev, customTwitterPrompt: "" }));
-      } else {
-        setCustomLinkedInPrompt("");
-        await updateCustomPrompts({
-          customLinkedInPrompt: undefined,
-        });
-        setInitialValues((prev) => ({ ...prev, customLinkedInPrompt: "" }));
-      }
-      toast.success("Prompt reset to default successfully!");
-    } catch (error: any) {
-      console.error("Failed to reset prompt:", error);
-      toast.error(error?.message || "Failed to reset prompt");
-      // Revert state on error
-      if (user) {
-        if (type === "commit") {
-          setCustomCommitPrompt(user.customCommitPrompt || "");
-        } else if (type === "twitter") {
-          setCustomTwitterPrompt(user.customTwitterPrompt || "");
-        } else {
-          setCustomLinkedInPrompt(user.customLinkedInPrompt || "");
-        }
-      }
-    } finally {
-      setIsSaving(false);
+  const handleReset = (type: "commit" | "twitter" | "linkedin") => {
+    if (type === "commit") {
+      setCustomCommitPrompt("");
+    } else if (type === "twitter") {
+      setCustomTwitterPrompt("");
+    } else {
+      setCustomLinkedInPrompt("");
     }
   };
 
