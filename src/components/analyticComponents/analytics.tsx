@@ -23,6 +23,7 @@ export function AnalyticsPage({ blogs, stats }: { blogs: Blog[]; stats: stats })
     const platformBreakdown = {
       twitter: blogs.filter((b) => b.platform === "twitter").length,
       linkedin: blogs.filter((b) => b.platform === "linkedin").length,
+      medium: blogs.filter((b) => b.platform === "medium").length,
     };
 
     const statusBreakdown = {
@@ -94,6 +95,19 @@ export function AnalyticsPage({ blogs, stats }: { blogs: Blog[]; stats: stats })
               <div className="flex items-center gap-3">
                 <Badge variant="secondary">{analytics.platformBreakdown.twitter}</Badge>
                 <span className="text-sm text-muted-foreground">{blogs.length > 0 ? Math.round((analytics.platformBreakdown.twitter / blogs.length) * 100) : 0}%</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <span className="font-medium">Medium</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant="outline">{analytics.platformBreakdown.medium}</Badge>
+                <span className="text-sm text-muted-foreground">{blogs.length > 0 ? Math.round((analytics.platformBreakdown.medium / blogs.length) * 100) : 0}%</span>
               </div>
             </div>
           </div>

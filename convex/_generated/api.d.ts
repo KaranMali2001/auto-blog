@@ -11,6 +11,7 @@
 import type * as action_helpers_commit from "../action_helpers/commit.js";
 import type * as action_helpers_gemini from "../action_helpers/gemini.js";
 import type * as action_helpers_github from "../action_helpers/github.js";
+import type * as action_helpers_pr from "../action_helpers/pr.js";
 import type * as aggregation from "../aggregation.js";
 import type * as config_gemini from "../config/gemini.js";
 import type * as config_github from "../config/github.js";
@@ -23,6 +24,7 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as schema_blog from "../schema/blog.js";
 import type * as schema_commit from "../schema/commit.js";
 import type * as schema_cron_history from "../schema/cron_history.js";
+import type * as schema_pull_request from "../schema/pull_request.js";
 import type * as schema_repo from "../schema/repo.js";
 import type * as schema_user from "../schema/user.js";
 import type * as schema_user_cron from "../schema/user_cron.js";
@@ -47,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   "action_helpers/commit": typeof action_helpers_commit;
   "action_helpers/gemini": typeof action_helpers_gemini;
   "action_helpers/github": typeof action_helpers_github;
+  "action_helpers/pr": typeof action_helpers_pr;
   aggregation: typeof aggregation;
   "config/gemini": typeof config_gemini;
   "config/github": typeof config_github;
@@ -59,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   "schema/blog": typeof schema_blog;
   "schema/commit": typeof schema_commit;
   "schema/cron_history": typeof schema_cron_history;
+  "schema/pull_request": typeof schema_pull_request;
   "schema/repo": typeof schema_repo;
   "schema/user": typeof schema_user;
   "schema/user_cron": typeof schema_user_cron;

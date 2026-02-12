@@ -117,6 +117,12 @@ I fixed a memory leak in the WebSocket connection manager where event listeners 
 
 ---
 
+# REPOSITORY CONTEXT (use to make the summary specific to this project)
+
+{repoContext}
+
+---
+
 # THE COMMIT YOU'RE ANALYZING
 
 **Commit Message**: {commitMessage}
@@ -248,8 +254,8 @@ Analyze the provided commit summaries and transform them into an authentic, huma
 # CRITICAL RULES - STRICTLY FOLLOW
 
 ## 1. NO HALLUCINATION - PRESERVE CORE WORK
-- **ONLY use information directly present in the commit summaries provided**
-- **DO NOT invent features, technologies, or metrics not mentioned in the commits**
+- **ONLY use information directly present in the commit summaries and PR summaries provided**
+- **DO NOT invent features, technologies, or metrics not mentioned in the commits or PRs**
 - **DO NOT add speculative future plans or capabilities**
 - **DO NOT embellish technical details beyond what's stated**
 - You CAN add context and storytelling elements around the facts
@@ -277,6 +283,7 @@ You MUST return ONLY valid JSON in this exact format:
 - Use \\n\\n for paragraph breaks (double newline)
 - Use \\n for single line breaks
 - **CRITICAL: NO ASTERISKS ANYWHERE - LinkedIn does NOT support markdown**
+- **DIAGRAMS**: When the content would benefit from an architecture or flow diagram, include a Mermaid code block using this format: \\n\\n\`\`\`mermaid\\nflowchart TB\\n  A --> B\\n\`\`\`\\n\\n Use simple link labels (no parentheses, no SQL). Node IDs: A, B, C. Keep labels short.
 - **DO NOT USE * or ** for any formatting - they will show as literal characters**
 - For headers/sections: Use PLAIN TEXT in Title Case or ALL CAPS
 - For emphasis: Use capital letters, line breaks, or plain text
@@ -375,9 +382,21 @@ Tell the story of your technical work:
 
 ---
 
+# REPOSITORY CONTEXT (use to make the post specific to the project; do not hallucinate)
+
+{repoContext}
+
+---
+
 # COMMIT SUMMARIES TO ANALYZE
 
 {commitSummaries}
+
+---
+
+# MERGED PR SUMMARIES (if any - weave these into the narrative where relevant)
+
+{prSummaries}
 
 ---
 
@@ -431,7 +450,7 @@ Return ONLY valid JSON with this structure:
 
 ⚠️ FINAL REMINDER: NO ASTERISKS in the output - not * and not **. Use PLAIN TEXT with ALL CAPS or Title Case for headers. LinkedIn does NOT support markdown formatting!
 
-Write authentically. Stay true to the commits. Make it feel human. Output PLAIN TEXT only. Start now.`;
+The output must be READY TO PASTE - no placeholders, no [add here], no TODO. Copy directly to LinkedIn and post. Write authentically. Stay true to the commits. Make it feel human. Output PLAIN TEXT only. Start now.`;
 
 export const generateTwitterPostPrompt = `You are an expert content creator specializing in crafting engaging Twitter/X posts and threads that showcase technical work in bite-sized, shareable formats.
 
@@ -455,8 +474,8 @@ Analyze the provided commit summaries and transform them into an authentic, huma
 # CRITICAL RULES - STRICTLY FOLLOW
 
 ## 1. NO HALLUCINATION - PRESERVE CORE WORK
-- **ONLY use information directly present in the commit summaries provided**
-- **DO NOT invent features, technologies, or metrics not mentioned in the commits**
+- **ONLY use information directly present in the commit summaries and PR summaries provided**
+- **DO NOT invent features, technologies, or metrics not mentioned in the commits or PRs**
 - **DO NOT add speculative future plans or capabilities**
 - **DO NOT embellish technical details beyond what's stated**
 - You CAN add context and storytelling elements around the facts
@@ -483,11 +502,30 @@ You MUST return ONLY valid JSON in this exact format:
 **FORMATTING RULES FOR CONTENT:**
 - Separate individual tweets with \\n---\\n (this is the tweet separator)
 - Each tweet should be under 280 characters
+- **DIAGRAMS**: When the content would benefit from an architecture or flow diagram, include a Mermaid code block: \\n\\n\`\`\`mermaid\\nflowchart TB\\n  A --> B\\n\`\`\`\\n\\n Use simple link labels (no parentheses, no SQL). The diagram will be rendered in-app.
 - Use \\n for line breaks within a single tweet
 - Use emojis sparingly for emphasis (1-2 per thread maximum)
 - Include 2-4 relevant hashtags in the LAST tweet only
 - Number threads if more than 3 tweets (1/, 2/, 3/)
 - Keep it scannable and punchy
+
+---
+
+# REPOSITORY CONTEXT (use to make the post specific to the project; do not hallucinate)
+
+{repoContext}
+
+---
+
+# COMMIT SUMMARIES TO ANALYZE
+
+{commitSummaries}
+
+---
+
+# MERGED PR SUMMARIES (if any - weave these into the thread where relevant)
+
+{prSummaries}
 
 ---
 
@@ -581,12 +619,6 @@ Build out your thread based on length:
 
 ---
 
-# COMMIT SUMMARIES TO ANALYZE
-
-{commitSummaries}
-
----
-
 # USER-PROVIDED OPTIONS
 
 **Tone Type**: {toneType}
@@ -604,4 +636,132 @@ Return ONLY valid JSON with this structure:
   "content": "Tweet 1 text here\\n---\\nTweet 2 text here\\n---\\nTweet 3 text here"
 }
 
-Remember: Separate tweets with \\n---\\n, keep each under 280 characters, stay true to commits, make it punchy. Start now.`;
+The output must be READY TO PASTE - no placeholders, no [add here], no TODO. Copy directly to Twitter and post. Separate tweets with \\n---\\n, keep each under 280 characters, stay true to commits (and PRs), make it punchy. Start now.`;
+
+export const generateMediumArticlePrompt = `You are an expert technical writer creating engaging, story-driven articles for Medium. Your goal: write something that flows like a great blog post — fun to read, with excitement and narrative momentum.
+
+# PLATFORM: MEDIUM
+Medium articles are:
+- Long-form (800-2000+ words for commits/repo, 400-1000 for project overview)
+- **Narrative-driven**: Read like a story, not a changelog. Hook the reader, build tension, deliver insights.
+- Detailed, explanatory, and educational — but always engaging
+- Use Markdown: headings (##, ###), **bold**, bullet points, optional short code snippets
+- Can include Mermaid diagrams for architecture/flow: \\n\\n\\\`\\\`\\\`mermaid\\nflowchart TB\\n  A --> B\\n\\\`\\\`\\\`\\n\\n
+- Suitable for developers and technical readers who want to enjoy what they read
+
+**MERMAID RULES**: Use simple link labels (no parentheses, no SQL). Node labels: short text only. Avoid subgraph unless grouping; if used, define nodes inside. Example: A[User] --> B[API] -- request --> C[Service].
+
+# ARTICLE AS STORY (Critical!)
+**NEVER write as "Commit 1, Commit 2, Commit 3" or "PR #X, PR #Y."** Instead:
+- **Open with a hook**: Make readers curious. "What problem did we solve? Why should I care?" Start with stakes, a question, or a compelling setup.
+- **Narrative arc**: Setup → Challenge → Solution → Impact. Weave commits and PRs into this flow — they are source material, not a structure.
+- **Transitions**: Connect ideas with "But here's the tricky part...", "The breakthrough came when...", "What made this especially satisfying..."
+- **Excitement**: Show why this work matters. Highlight moments of insight, clever solutions, or surprising results.
+- **Satisfying close**: End with a takeaway, a forward-looking insight, or a "what we learned" — not a bullet list of changes.
+- **Voice**: Write like you're sharing a journey. Conversational, confident, occasionally playful. Technical but human.
+
+**CRITICAL - CODE BLOCKS**: Do NOT dump raw schema definitions, database schemas, config files, or large code blocks. If you use code, keep it to 5-15 lines max — brief snippets that illustrate a point. Never include entire files, Convex schemas, or verbatim project structure. Prefer prose descriptions over code dumps.
+
+# SOURCE: {mediumSource}
+
+{sourceSpecificInstructions}
+
+# REPOSITORY CONTEXT
+
+{repoContext}
+
+# COMMIT AND PR SUMMARIES (Raw Material)
+
+Use the following as source material. Do NOT copy their structure. Weave the information into your narrative.
+
+{commitSummaries}
+
+{prSummaries}
+
+# TONE AND LENGTH
+
+**Tone**: {toneType}
+**Length**: {length} - Write a comprehensive article with clear sections, subsections, and optional code blocks or Mermaid diagrams where they add value.
+
+# OUTPUT FORMAT
+
+Return ONLY valid JSON:
+{
+  "title": "Compelling article title (60-120 characters)",
+  "content": "Full Markdown article with ## headings, flowing paragraphs, optional code blocks and Mermaid diagrams"
+}
+
+No hallucination. Use only information from the provided context. Output must be READY TO PASTE into Medium. Write an article readers will enjoy — not a dry report.`;
+
+export const regenerateBlogPrompt = `You are an expert content creator. You previously generated a blog post/article, and now the user has provided feedback to improve it.
+
+# PREVIOUS VERSION YOU CREATED
+
+**Title**: {previousTitle}
+
+**Content**:
+{previousContent}
+
+# USER FEEDBACK AND REGENERATION INSTRUCTIONS
+
+{userInput}
+
+# WHAT TO REGENERATE
+
+{regenerateWhat}
+
+# ORIGINAL SOURCE MATERIAL
+
+## Platform
+{platform}
+
+## Repository Context
+{repoContext}
+
+## Commit Summaries
+{commitSummaries}
+
+## PR Summaries
+{prSummaries}
+
+## Tone & Length
+**Tone**: {toneType}
+**Length**: {length}
+
+# YOUR TASK: CREATE AN IMPROVED VERSION
+
+Follow these steps:
+
+**Step 1**: Carefully read the user's feedback. What specific improvements are they requesting? Should you:
+- Change the tone (more technical, more business-focused, etc.)?
+- Adjust length (make it longer/shorter)?
+- Add more examples or detail?
+- Restructure the narrative flow?
+- Emphasize different aspects?
+
+**Step 2**: Review your previous version. Identify what worked well and what needs improvement based on the feedback.
+
+**Step 3**: Review the original source material (commits, PRs, repo context). Look for details or angles you might have missed that the user's feedback suggests.
+
+**Step 4**: Create the new version incorporating the feedback while maintaining quality:
+- If regenerating **title only**: Create a new, improved title. Keep content exactly the same.
+- If regenerating **content only**: Improve the content. Keep title exactly the same.
+- If regenerating **both**: Create improved title and content that work together.
+
+# CRITICAL REMINDERS
+
+- Follow the platform-specific guidelines ({platform})
+- Maintain narrative flow and storytelling (especially for Medium)
+- Use only facts from the provided context — no hallucination
+- If the user asks for something that contradicts the source material, prioritize accuracy but adjust presentation
+- The output should be READY TO PASTE
+
+# OUTPUT FORMAT
+
+Return ONLY valid JSON:
+{
+  "title": "Your improved title here",
+  "content": "Your improved content here"
+}
+
+Start now. Create an improved version that addresses the user's feedback.`;

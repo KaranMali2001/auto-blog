@@ -29,4 +29,25 @@ export interface GitHubWebhookPayload {
   repositories_added?: GithubRepoForInstallation[];
   repositories_removed?: GithubRepoForInstallation[];
   after?: string; // commit SHA for push events
+  ref?: string; // e.g. refs/heads/main for push events
+}
+
+export interface GitHubPullRequest {
+  number: number;
+  title: string;
+  body: string | null;
+  state: string;
+  merged: boolean;
+  merged_at: string | null;
+  base: { ref: string };
+  head: { ref: string };
+  html_url: string;
+}
+
+export interface GitHubPullRequestPayload {
+  action: string;
+  number: number;
+  pull_request: GitHubPullRequest;
+  repository: GitHubRepository & { html_url?: string; full_name?: string };
+  installation: GitHubInstallation;
 }

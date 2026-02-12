@@ -164,7 +164,7 @@ export function BlogsPage() {
                       <Badge variant={blog.status === "completed" ? "default" : "secondary"}>{blog.status}</Badge>
                     </div>
                     <CardDescription className="whitespace-nowrap">
-                      {blog.platform === "twitter" ? "Twitter/X" : "LinkedIn"} • {blog.commitIds.length} commit
+                      {blog.platform === "twitter" ? "Twitter/X" : blog.platform === "medium" ? "Medium" : "LinkedIn"} • {blog.commitIds.length} commit
                       {blog.commitIds.length !== 1 ? "s" : ""}
                     </CardDescription>
                   </div>

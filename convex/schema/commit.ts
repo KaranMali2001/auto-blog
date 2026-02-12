@@ -1,7 +1,7 @@
 import { defineTable, paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { internalMutation } from "../_generated/server";
+import { internalMutation, internalQuery } from "../_generated/server";
 import { aggregateByCommitCount, aggregateByCommitSummary } from "../aggregation";
 import { authenticatedMutation, authenticatedQuery } from "../lib/auth";
 
@@ -78,6 +78,38 @@ export const getCommits = authenticatedQuery({
       ...commits,
       page: commits.page.map(({ summarizedCommitDiff, ...rest }) => rest),
     };
+  },
+});
+
+export const getCommitsByRepoIdAndSince = internalQuery({
+  args: { repoId: v.id("repos"), userId: v.id("users"), since: v.number() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("commits")
+      .withIndex("byRepoId", (q) => q.eq("repoId", args.repoId))
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .filter((q) => q.gte(q.field("_creationTime"), args.since))
+      .order("desc")
+      .take(50);
+  },
+});
+
+export const getCommitsByRepoIdsAndSince = internalQuery({
+  args: { repoIds: v.array(v.id("repos")), userId: v.id("users"), since: v.number() },
+  handler: async (ctx, args) => {
+    const repoIdSet = new Set(args.repoIds);
+    const all: Awaited<ReturnType<typeof ctx.db.query>>[] = [];
+    for (const repoId of args.repoIds) {
+      const commits = await ctx.db
+        .query("commits")
+        .withIndex("byRepoId", (q) => q.eq("repoId", repoId))
+        .filter((q) => q.eq(q.field("userId"), args.userId))
+        .filter((q) => q.gte(q.field("_creationTime"), args.since))
+        .order("desc")
+        .take(20);
+      all.push(...commits);
+    }
+    return all.sort((a, b) => b._creationTime - a._creationTime).slice(0, 30);
   },
 });
 

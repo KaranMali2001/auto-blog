@@ -11,7 +11,7 @@ export interface Blog {
   title: string;
   content: string;
   status: "pending" | "completed";
-  platform: "twitter" | "linkedin";
+  platform: "twitter" | "linkedin" | "medium";
   userId: Id<"users">;
   commitIds: Id<"commits">[];
   toneType?: string;
@@ -120,11 +120,13 @@ export interface stats {
 // Form Types
 export interface BlogGenerationFormData {
   title?: string;
-  platform: "twitter" | "linkedin";
+  platform: "twitter" | "linkedin" | "medium";
   toneType: "technical" | "business" | "hiring" | "custom";
   customTone?: string;
   length: "short" | "medium" | "long";
   commitIds: Id<"commits">[];
+  mediumSource?: "commits" | "repo" | "project";
+  mediumRepoId?: Id<"repos">;
 }
 
 export interface CronScheduleFormData {
@@ -150,6 +152,7 @@ export interface AnalyticsData {
   platformBreakdown: {
     twitter: number;
     linkedin: number;
+    medium: number;
   };
   statusBreakdown: {
     completed: number;
@@ -167,7 +170,7 @@ export interface BlogTemplate {
   _id: string;
   name: string;
   description: string;
-  platform: "twitter" | "linkedin";
+  platform: "twitter" | "linkedin" | "medium";
   toneType: string;
   length: string;
   templateContent: string;
