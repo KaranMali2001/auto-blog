@@ -98,7 +98,7 @@ export const getCommitsByRepoIdsAndSince = internalQuery({
   args: { repoIds: v.array(v.id("repos")), userId: v.id("users"), since: v.number() },
   handler: async (ctx, args) => {
     const repoIdSet = new Set(args.repoIds);
-    const all: Awaited<ReturnType<typeof ctx.db.query>>[] = [];
+    const all = [];
     for (const repoId of args.repoIds) {
       const commits = await ctx.db
         .query("commits")
