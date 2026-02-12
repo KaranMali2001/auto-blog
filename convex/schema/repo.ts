@@ -9,6 +9,11 @@ export const repoSchema = defineTable({
   repoUrl: v.string(),
   installationId: v.number(),
   userId: v.id("users"),
+  readmePreview: v.optional(v.string()),
+  repoDescription: v.optional(v.string()),
+  repoLanguage: v.optional(v.string()),
+  fileTreePreview: v.optional(v.string()),
+  repoContextUpdatedAt: v.optional(v.number()),
 })
   .index("byName", ["name"])
   .index("byUserId", ["userId"])
@@ -56,6 +61,51 @@ export const getRepos = authenticatedQuery({
     }));
   },
 });
+export const updateRepoContext = internalMutation({
+  args: {
+    repoId: v.id("repos"),
+    readmePreview: v.optional(v.string()),
+    repoDescription: v.optional(v.string()),
+    repoLanguage: v.optional(v.string()),
+    fileTreePreview: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { repoId, ...updates } = args;
+    await ctx.db.patch(repoId, {
+      ...updates,
+      repoContextUpdatedAt: Date.now(),
+    });
+  },
+});
+
+export const getRepoByIdInternal = internalQuery({
+  args: { repoId: v.id("repos") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.repoId);
+  },
+});
+
+export const getReposWithContextByUrls = internalQuery({
+  args: { userId: v.id("users"), repoUrls: v.array(v.string()) },
+  handler: async (ctx, args) => {
+    const repos = await ctx.db
+      .query("repos")
+      .withIndex("byUserId", (q) => q.eq("userId", args.userId))
+      .collect();
+    return repos.filter((r) => args.repoUrls.includes(r.repoUrl));
+  },
+});
+
+export const getReposByUserId = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("repos")
+      .withIndex("byUserId", (q) => q.eq("userId", args.userId))
+      .collect();
+  },
+});
+
 export const getRepoByInstallation = internalQuery({
   args: {
     installationId: v.number(),

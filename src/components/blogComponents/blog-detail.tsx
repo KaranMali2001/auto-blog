@@ -3,8 +3,10 @@
 import { useQueryWithStatus } from "@/app/Providers";
 import { CommitCard } from "@/components/commitComponents/commit-card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useMutation } from "convex/react";
-import { ArrowLeft, Check, Copy, Edit, Trash2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Copy, Edit, RefreshCw, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -18,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDateTime, formatPlatform, getWordCount } from "@/lib/utils";
+import { BlogContentWithMermaid } from "./blog-content-with-mermaid";
 import type { Repository } from "@/types/index";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -35,15 +38,22 @@ export function BlogDetailPage({ blogId }: BlogDetailPageProps) {
   const [editedContent, setEditedContent] = useState("");
   const [copied, setCopied] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
+  const [regenerateTitle, setRegenerateTitle] = useState(true);
+  const [regenerateContent, setRegenerateContent] = useState(true);
+  const [userInput, setUserInput] = useState("");
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // Fetch blog from Convex
   const { data: blog, isPending: isBlogPending, error: blogError } = useQueryWithStatus(api.schema.blog.getBlogById, { blogId: blogId as Id<"blogs"> });
   const { data: commits, isPending: isCommitsPending, error: commitsError } = useQueryWithStatus(api.schema.commit.getRelatedCommits, { blogId: blogId as Id<"blogs"> });
   const { data: repos, isPending: isReposPending, error: reposError } = useQueryWithStatus(api.schema.repo.getRepos);
+  const versionInfo = useQuery(api.schema.blog.getVersionInfo, blog ? { blogId: blog._id } : "skip");
 
   // Mutations
   const updateBlog = useMutation(api.schema.blog.updateBlog);
   const deleteBlog = useMutation(api.schema.blog.deleteBlog);
+  const regenerateBlogMutation = useMutation(api.schema.blog.regenerateBlog);
 
   useEffect(() => {
     if (blog) {
@@ -123,6 +133,59 @@ export function BlogDetailPage({ blogId }: BlogDetailPageProps) {
     }
   };
 
+  const handleRegenerate = async () => {
+    if (!blog) return;
+    if (!regenerateTitle && !regenerateContent) {
+      toast.error("Please select at least title or content to regenerate");
+      return;
+    }
+    if (!userInput.trim()) {
+      toast.error("Please provide instructions for regeneration");
+      return;
+    }
+
+    try {
+      setIsRegenerating(true);
+      const newBlogId = await regenerateBlogMutation({
+        blogId: blog._id,
+        userInput: userInput.trim(),
+        regenerateTitle,
+        regenerateContent,
+      });
+      toast.success("Regenerating blog... You'll be redirected to the new version.");
+      setShowRegenerateDialog(false);
+      setUserInput("");
+      // Redirect to new version after a short delay
+      setTimeout(() => {
+        router.push(`/blogs/${newBlogId}`);
+      }, 1500);
+    } catch (error) {
+      console.error("Failed to regenerate blog:", error);
+      toast.error("Failed to regenerate blog. Please try again.");
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
+  const handleQuickOption = (option: string) => {
+    setUserInput((prev) => (prev ? `${prev}\n\n${option}` : option));
+  };
+
+  const handleNavigateVersion = (versionId: Id<"blogs"> | undefined) => {
+    if (versionId) {
+      router.push(`/blogs/${versionId}`);
+    }
+  };
+
+  const quickOptions = [
+    "Make it more technical with specific implementation details",
+    "Make it more business-focused emphasizing ROI and impact",
+    "Make it longer with more examples and explanation",
+    "Make it shorter and more concise",
+    "Add more storytelling and narrative flow",
+    "Use a more casual, conversational tone",
+  ];
+
   // Loading state
   if (isBlogPending) {
     return <Spinner centered title="Loading blog post..." />;
@@ -150,6 +213,10 @@ export function BlogDetailPage({ blogId }: BlogDetailPageProps) {
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
       </svg>
+    ) : blog.platform === "medium" ? (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.2-2.58-1.2-5.75s.54-5.75 1.2-5.75C23.47 6.25 24 8.83 24 12z" />
+      </svg>
     ) : (
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
         <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z" />
@@ -167,10 +234,125 @@ export function BlogDetailPage({ blogId }: BlogDetailPageProps) {
 
         {!isEditing && (
           <div className="flex items-center gap-2">
+            {/* Version Navigation */}
+            {versionInfo && versionInfo.totalVersions > 1 && (
+              <div className="flex items-center gap-1 border border-border rounded-md">
+                <Button variant="ghost" size="sm" onClick={() => handleNavigateVersion(versionInfo.previousVersionId)} disabled={!versionInfo.hasPrevious} className="h-8 px-2">
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-xs text-muted-foreground px-2 border-x border-border">
+                  V{versionInfo.currentVersion}/{versionInfo.totalVersions}
+                </span>
+                <Button variant="ghost" size="sm" onClick={() => handleNavigateVersion(versionInfo.nextVersionId)} disabled={!versionInfo.hasNext} className="h-8 px-2">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
             <Button variant="outline" onClick={handleCopy}>
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {copied ? "Copied" : "Copy"}
             </Button>
+
+            {/* Regenerate Button with Modal */}
+            <Dialog open={showRegenerateDialog} onOpenChange={setShowRegenerateDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <RefreshCw className="h-4 w-4" />
+                  Regenerate
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Regenerate Blog</DialogTitle>
+                  <DialogDescription>Create a new version based on your feedback. All versions are saved so you can navigate between them.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  {/* What to Regenerate */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">What to regenerate:</Label>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="regenerate-title"
+                          checked={regenerateTitle}
+                          onCheckedChange={(checked) => {
+                            if (typeof checked === "boolean") {
+                              setRegenerateTitle(checked);
+                            }
+                          }}
+                        />
+                        <label htmlFor="regenerate-title" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                          Title
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="regenerate-content"
+                          checked={regenerateContent}
+                          onCheckedChange={(checked) => {
+                            if (typeof checked === "boolean") {
+                              setRegenerateContent(checked);
+                            }
+                          }}
+                        />
+                        <label htmlFor="regenerate-content" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                          Content
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Options */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">Quick options (click to add):</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {quickOptions.map((option, idx) => (
+                        <Button key={idx} variant="outline" size="sm" className="justify-start text-xs h-auto py-2 px-3 whitespace-normal text-left" onClick={() => handleQuickOption(option)}>
+                          {option}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Custom Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="user-input" className="text-sm font-medium">
+                      Your instructions:
+                    </Label>
+                    <Textarea
+                      id="user-input"
+                      placeholder="e.g., 'Make it more engaging with real-world examples' or 'Focus more on the technical architecture'"
+                      value={userInput}
+                      onChange={(e) => setUserInput(e.target.value)}
+                      className="min-h-[120px] text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">Be specific about what you want changed. The more detail, the better the result.</p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end gap-2 pt-4 border-t">
+                    <Button variant="outline" onClick={() => setShowRegenerateDialog(false)} disabled={isRegenerating}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleRegenerate} disabled={isRegenerating || !userInput.trim() || (!regenerateTitle && !regenerateContent)}>
+                      {isRegenerating ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Regenerating...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Create New Version
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <Button variant="outline" onClick={() => setIsEditing(true)}>
               <Edit className="h-4 w-4" />
               Edit
@@ -234,6 +416,25 @@ export function BlogDetailPage({ blogId }: BlogDetailPageProps) {
             </div>
           )}
 
+          {versionInfo && versionInfo.totalVersions > 1 && (
+            <div>
+              <Label className="text-xs text-muted-foreground">Version</Label>
+              <div className="mt-1 flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => handleNavigateVersion(versionInfo.previousVersionId)} disabled={!versionInfo.hasPrevious} className="h-8 px-2">
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <span className="text-sm font-medium">
+                  V{versionInfo.currentVersion} of {versionInfo.totalVersions}
+                </span>
+                <Button variant="outline" size="sm" onClick={() => handleNavigateVersion(versionInfo.nextVersionId)} disabled={!versionInfo.hasNext} className="h-8 px-2">
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
           {blog.totalGenerations && blog.totalGenerations > 1 && (
             <div>
               <Label className="text-xs text-muted-foreground">Generated</Label>
@@ -261,7 +462,9 @@ export function BlogDetailPage({ blogId }: BlogDetailPageProps) {
         ) : (
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <h1 className="mb-6 text-3xl font-bold text-card-foreground">{blog.title || "Untitled"}</h1>
-            <div className="whitespace-pre-wrap text-card-foreground leading-relaxed">{blog.content}</div>
+            <div className="text-card-foreground">
+              <BlogContentWithMermaid content={blog.content} />
+            </div>
           </div>
         )}
       </div>

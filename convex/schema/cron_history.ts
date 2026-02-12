@@ -81,6 +81,21 @@ export const executeCronJob = internalMutation({
       }));
       const commitIds = allCommits.map((commit) => commit._id);
 
+      const since = Date.now() - 24 * 60 * 60 * 1000;
+      const mergedPrs = await ctx.runQuery(internal.schema.pull_request.getPullRequestsByUserIdAndTimeRange, {
+        userId: userCron.userId,
+        repoIds: userCron.selectedRepos,
+        since,
+      });
+      const prSummaries = mergedPrs
+        .filter((pr) => pr.summarizedPrDiff)
+        .map((pr) => ({
+          prNumber: pr.prNumber,
+          title: pr.title,
+          repoName: pr.repoUrl,
+          summarizedPrDiff: pr.summarizedPrDiff ?? "",
+        }));
+
       //generate blog without summary
       const linkedinBlogId = await ctx.db.insert("blogs", {
         userId: userCron.userId,
@@ -111,14 +126,15 @@ export const executeCronJob = internalMutation({
           blogId: linkedinBlogId,
           commits: commitSummaries,
           platform: "linkedin",
-
           totalGeneration: 0,
+          prSummaries,
         }),
         ctx.scheduler.runAfter(0, internal.action_helpers.gemini.generateBlog, {
           blogId: twitterBlogId,
           commits: commitSummaries,
           platform: "twitter",
           totalGeneration: 0,
+          prSummaries,
         }),
       ]);
 

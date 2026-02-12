@@ -142,6 +142,8 @@ export function formatPlatform(platform: string): string {
       return "Twitter/X";
     case "linkedin":
       return "LinkedIn";
+    case "medium":
+      return "Medium";
     default:
       return platform;
   }

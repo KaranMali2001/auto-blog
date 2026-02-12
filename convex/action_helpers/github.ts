@@ -53,6 +53,21 @@ export const getCommitDiffAction = internalAction({
         id: args.id,
         status: "success",
       });
+      const repoContextData = await ctx.runAction(internal.action_helpers.github.getRepoContext, {
+        installationId: args.installationId,
+        owner,
+        repo,
+      });
+      await ctx.runMutation(internal.schema.repo.updateRepoContext, {
+        repoId: repos[0]._id,
+        ...repoContextData,
+      });
+      const repoContextParts: string[] = [];
+      if (repoContextData.repoDescription) repoContextParts.push(`Description: ${repoContextData.repoDescription}`);
+      if (repoContextData.repoLanguage) repoContextParts.push(`Primary language: ${repoContextData.repoLanguage}`);
+      if (repoContextData.readmePreview) repoContextParts.push(`README (excerpt):\n${repoContextData.readmePreview}`);
+      if (repoContextData.fileTreePreview) repoContextParts.push(`File structure:\n${repoContextData.fileTreePreview}`);
+      const repoContext = repoContextParts.length > 0 ? repoContextParts.join("\n\n") : "";
       const promptToUse = user.customCommitPrompt && user.customCommitPrompt.trim() !== "" ? user.customCommitPrompt : singleCommitPrompt;
       const commitSummary = await ctx.runAction(internal.action_helpers.gemini.getSummary, {
         commitMessage: commit.commit.message,
@@ -60,6 +75,7 @@ export const getCommitDiffAction = internalAction({
         stats,
         fileContent: filteredDiff,
         prompt: promptToUse,
+        repoContext,
       });
       if (!commitSummary) {
         return null;
@@ -128,6 +144,74 @@ export const getInstallationRepo = internalAction({
     }
   },
 });
+const README_MAX_CHARS = 5000;
+const FILE_TREE_MAX_PATHS = 150;
+
+export const getRepoContext = internalAction({
+  args: {
+    installationId: v.number(),
+    owner: v.string(),
+    repo: v.string(),
+  },
+  handler: async (_ctx, args) => {
+    const app = githubApp();
+    const octokit = await app.getInstallationOctokit(args.installationId);
+    let readmePreview: string | undefined;
+    let repoDescription: string | undefined;
+    let repoLanguage: string | undefined;
+    let fileTreePreview: string | undefined;
+
+    try {
+      const { data: readme } = await octokit.rest.repos.getReadme({
+        owner: args.owner,
+        repo: args.repo,
+      });
+      if (readme.content) {
+        const decoded = Buffer.from(readme.content, "base64").toString("utf-8");
+        readmePreview = decoded.length > README_MAX_CHARS ? decoded.slice(0, README_MAX_CHARS) + "\n...[truncated]" : decoded;
+      }
+    } catch {
+      // README may not exist
+    }
+
+    try {
+      const { data: repoData } = await octokit.rest.repos.get({
+        owner: args.owner,
+        repo: args.repo,
+      });
+      repoDescription = repoData.description ?? undefined;
+      repoLanguage = repoData.language ?? undefined;
+    } catch {
+      // Ignore
+    }
+
+    try {
+      const { data: contents } = await octokit.rest.repos.getContent({
+        owner: args.owner,
+        repo: args.repo,
+        path: "",
+      });
+      const paths: string[] = [];
+      const collect = (items: typeof contents) => {
+        if (Array.isArray(items)) {
+          for (const item of items) {
+            if (paths.length >= FILE_TREE_MAX_PATHS) break;
+            paths.push(item.type === "dir" ? `${item.path}/` : item.path);
+          }
+        }
+      };
+      collect(contents);
+      if (paths.length > 0) {
+        fileTreePreview = paths.join("\n");
+      }
+    } catch {
+      // Ignore
+    }
+
+    return { readmePreview, repoDescription, repoLanguage, fileTreePreview };
+  },
+});
+
 export const getCommitData = internalAction({
   args: {
     installationId: v.number(),

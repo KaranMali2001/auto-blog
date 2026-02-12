@@ -93,16 +93,18 @@ export function DashboardPage() {
   };
 
   const handleGenerateBlog = () => {
-    if (selectedCommits.size === 0) {
-      toast.error("Please select at least one commit");
-      return;
-    }
     setIsModalOpen(true);
   };
 
   const handleSubmitBlogGeneration = async (data: BlogGenerationFormData) => {
     try {
       const commitIds = Array.from(selectedCommits) as Id<"commits">[];
+
+      const needsCommits = data.platform !== "medium" || data.mediumSource === "commits";
+      if (needsCommits && commitIds.length === 0) {
+        toast.error("Please select at least one commit");
+        throw new Error("No commits selected");
+      }
 
       const blogId = await generateBlog({
         commitIds,
@@ -112,6 +114,8 @@ export function DashboardPage() {
           toneType: data.toneType || data.customTone,
           length: data.length,
         },
+        mediumSource: data.mediumSource,
+        mediumRepoId: data.mediumRepoId,
       });
 
       toast.success("Blog generation started!");

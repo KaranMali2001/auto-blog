@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 
-import type { GitHubWebhookPayload } from "@/types/github";
+import type { GitHubPullRequestPayload, GitHubWebhookPayload } from "@/types/github";
 import { internal } from "../_generated/api";
 import { httpAction } from "../_generated/server";
 
@@ -20,7 +20,40 @@ export const githubWebhook = httpAction(async (ctx, req) => {
 
     const event: string | null = req.headers.get("x-github-event");
 
+    if (event === "pull_request") {
+      const prPayload = payload as unknown as GitHubPullRequestPayload;
+      if (prPayload.action === "closed" && prPayload.pull_request?.merged === true) {
+        const repoUrl = prPayload.repository?.html_url ?? `https://github.com/${prPayload.repository?.full_name ?? ""}`;
+        const user = await ctx.runQuery(internal.schema.user.getUserByinstallationId, {
+          installationId: prPayload.installation.id,
+        });
+        const repos = await ctx.runQuery(internal.schema.repo.getRepoByInstallation, {
+          installationId: prPayload.installation.id,
+          repoUrl: [repoUrl],
+        });
+        if (user && repos && repos.length > 0) {
+          await ctx.runMutation(internal.schema.pull_request.storeAndSchedulePrSummary, {
+            installationId: prPayload.installation.id,
+            repoUrl,
+            prNumber: prPayload.pull_request.number,
+            prTitle: prPayload.pull_request.title,
+            prBody: prPayload.pull_request.body ?? undefined,
+            baseRef: prPayload.pull_request.base.ref,
+            headRef: prPayload.pull_request.head.ref,
+            repoId: repos[0]._id,
+            userId: user._id,
+          });
+        }
+      }
+      return new Response("ok", { status: 200 });
+    }
+
     if (event === "push") {
+      // Only process pushes to main or master branch
+      const ref = payload.ref;
+      if (ref && ref !== "refs/heads/main" && ref !== "refs/heads/master") {
+        return new Response("ok", { status: 200 });
+      }
       await ctx.runMutation(internal.schema.webhook.storeAndSchedule, {
         webhook_platform: "github",
         webhook_event: event,
